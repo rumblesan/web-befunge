@@ -7,33 +7,27 @@
     autostart: true
   }).appendTo(elem);
 
-  var circle = two.makeCircle(72, 100, 50);
-  var rect = two.makeRectangle(213, 100, 100, 100);
-
-  circle.fill = '#FF8000';
-  circle.stroke = 'orangered';
-  circle.linewidth = 5;
-
-  rect.fill = 'rgb(0, 200, 255)';
-  rect.opacity = 0.75;
-  rect.noStroke();
-
   var grid = drawGrid(two, 50, 30, 100);
 
-  var shapes = two.makeGroup();
-  shapes.add(grid.gfx, circle, rect);
+  var cells = two.makeGroup();
 
   two.update();
 
-  addInteractivity(grid, circle);
-  addInteractivity(grid, rect);
-
-  setToNearestSquare(grid, circle);
-  setToNearestSquare(grid, rect);
-
   addWindowMovement(two, grid);
+  addNewCellInteractivity(two, grid, cells);
 
 })();
+
+function addNewCell (two, grid, cells, xPos, yPos) {
+  var cell = two.makeRectangle((xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize, grid.cellSize, grid.cellSize);
+  cell.fill = '#FF8000';
+  cell.stroke = 'orangered';
+  cell.opacity = 0.75;
+  cell.linewidth = 5;
+  cells.add(cell);
+  two.update();
+  addInteractivity(grid, cell);
+}
 
 function drawGrid (two, xCells, yCells, cellSize) {
   var gridGfx = two.makeGroup();
@@ -74,6 +68,21 @@ function setToNearestSquare (grid, shape) {
   var nearestX = (Math.round(shape.translation.x / grid.cellSize - 0.5) + 0.5) * grid.cellSize;
   var nearestY = (Math.round(shape.translation.y / grid.cellSize - 0.5) + 0.5) * grid.cellSize;
   shape.translation.set(nearestX, nearestY);
+}
+
+function getGridCoordinate (grid, xPos, yPos) {
+  var nearestX = Math.round(xPos / grid.cellSize - 0.5);
+  var nearestY = Math.round(yPos / grid.cellSize - 0.5);
+  return {x: nearestX, y: nearestY};
+}
+
+function addNewCellInteractivity (two, grid, cells) {
+  grid.gfx._renderer.elem.addEventListener('dblclick', function (e) {
+    e.preventDefault();
+    var initial = two.scene.translation;
+    var gridCoords = getGridCoordinate(grid, e.clientX - initial.x, e.clientY - initial.y);
+    addNewCell(two, grid, cells, gridCoords.x, gridCoords.y);
+  });
 }
 
 function addInteractivity (grid, shape) {
