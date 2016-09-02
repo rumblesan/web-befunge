@@ -1,13 +1,13 @@
-/* global Two */
+/* global Two: false */
 
 import {Grid, Cell} from './ui';
 
 (function () {
-  var elem = document.getElementById('app');
   var two = new Two({
+    type: Two.Types['svg'],
     fullscreen: true,
     autostart: true
-  }).appendTo(elem);
+  }).appendTo(document.getElementById('app'));
 
   var grid = Grid(two, 50, 30, 100);
 
