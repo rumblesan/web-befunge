@@ -3,12 +3,14 @@
 import Instructions from './instructions';
 import _ from 'underscore';
 
-export const cellCreationMenu = (two, coords, cellConstructor) => {
+export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
-  const buttonWidth = 50;
-  const buttonHeight = 50;
-  const menuWidth = 250;
-  const menuHeight = 250;
+  const buttonWidth = menuConfig.buttonWidth;
+  const buttonHeight = menuConfig.buttonHeight;
+  const columns = menuConfig.buttonColumns;
+  const menuWidth = buttonWidth * columns;
+  const rows = Math.ceil(Instructions.count / columns);
+  const menuHeight = rows * buttonHeight;
 
   const menu = {
     svg: two.makeGroup(),
@@ -19,12 +21,12 @@ export const cellCreationMenu = (two, coords, cellConstructor) => {
   const menubg = two.makeRectangle(coords.xPos, coords.yPos, menuWidth, menuHeight);
   menu.svg.add(menubg);
 
-  const xOffset = menubg.translation.x - 150;
-  const yOffset = menubg.translation.y - 150;
+  const xOffset = menubg.translation.x - (menuWidth / 2) - (buttonWidth / 2);
+  const yOffset = menubg.translation.y - (menuHeight / 2) - (buttonHeight / 2);
 
-  for (let x = 0; x < 5; x += 1) {
-    for (let y = 0; y < 5; y += 1) {
-      let inst = Instructions[(y * 5) + x];
+  for (let x = 0; x < columns; x += 1) {
+    for (let y = 0; y < rows; y += 1) {
+      let inst = Instructions[(y * columns) + x];
       if (inst) {
         let button = CellCreateButton(
           two,

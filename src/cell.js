@@ -1,23 +1,23 @@
 /* global Two: false */
 
-export const create = (two, grid, xPos, yPos, instruction) => {
-  console.log('inst', instruction);
+export const create = (two, grid, xPos, yPos, instruction, cellStyle) => {
   var gfx = two.makeGroup();
   const text = new Two.Text(
     instruction.symbol,
     (xPos + 0.5) * grid.cellSize,
     (yPos + 0.5) * grid.cellSize
   );
+  text.size = cellStyle.textSize;
   const cellGfx = two.makeRectangle(
     (xPos + 0.5) * grid.cellSize,
     (yPos + 0.5) * grid.cellSize,
     grid.cellSize,
     grid.cellSize
   );
-  cellGfx.fill = '#FF8000';
-  cellGfx.stroke = 'orangered';
-  cellGfx.opacity = 0.75;
-  cellGfx.linewidth = 5;
+  cellGfx.fill = cellStyle.fill;
+  cellGfx.stroke = cellStyle.stroke;
+  cellGfx.opacity = cellStyle.opacity;
+  cellGfx.linewidth = cellStyle.lineWidth;
   gfx.add(cellGfx, text);
   return {
     instruction: instruction,

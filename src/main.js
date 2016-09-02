@@ -7,6 +7,24 @@ import * as Cell from './cell';
 
 import {cellCreationMenu} from './creationMenu';
 
+const gridConfig = {
+  xCells: 50,
+  yCells: 30,
+  cellSize: 70
+};
+const menuConfig = {
+  buttonWidth: 50,
+  buttonHeight: 50,
+  buttonColumns: 5
+};
+const cellStyle = {
+  fill: '#FF8000',
+  stroke: 'orangered',
+  lineWidth: 5,
+  opacity: 0.75,
+  textSize: 50
+};
+
 (function () {
   const two = new Two({
     type: Two.Types['svg'],
@@ -14,7 +32,12 @@ import {cellCreationMenu} from './creationMenu';
     autostart: true
   }).appendTo(document.getElementById('app'));
 
-  const grid = Grid.create(two, 50, 30, 100);
+  const grid = Grid.create(
+    two,
+    gridConfig.xCells,
+    gridConfig.yCells,
+    gridConfig.cellSize
+  );
   const cellGfx = two.makeGroup();
 
   const program = Program.create(grid, grid.gfx, cellGfx);
@@ -32,7 +55,7 @@ function addGridInteractivity (two, program) {
     e.preventDefault();
     const initial = two.scene.translation;
     const coords = Grid.getCoordinates(program.grid, e.clientX - initial.x, e.clientY - initial.y);
-    cellCreationMenu(two, coords, cellConstructor(two, program));
+    cellCreationMenu(two, coords, cellConstructor(two, program), menuConfig);
     two.update();
   });
 
@@ -102,7 +125,7 @@ const snapCellToGrid = (grid, cell) => {
 const cellConstructor = (two, program) => {
   return (instruction, coords) => {
 
-    const newCell = Cell.create(two, program.grid, coords.x, coords.y, instruction);
+    const newCell = Cell.create(two, program.grid, coords.x, coords.y, instruction, cellStyle);
     Program.addCell(program, coords.x, coords.y, newCell);
     two.update();
     addCellInteractivity(two, program, newCell);

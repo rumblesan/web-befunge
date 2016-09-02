@@ -1549,22 +1549,22 @@
 }.call(this));
 
 },{}],2:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 /* global Two: false */
 
-var create = exports.create = function create(two, grid, xPos, yPos, instruction) {
-  console.log('inst', instruction);
+var create = exports.create = function create(two, grid, xPos, yPos, instruction, cellStyle) {
   var gfx = two.makeGroup();
   var text = new Two.Text(instruction.symbol, (xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize);
+  text.size = cellStyle.textSize;
   var cellGfx = two.makeRectangle((xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize, grid.cellSize, grid.cellSize);
-  cellGfx.fill = '#FF8000';
-  cellGfx.stroke = 'orangered';
-  cellGfx.opacity = 0.75;
-  cellGfx.linewidth = 5;
+  cellGfx.fill = cellStyle.fill;
+  cellGfx.stroke = cellStyle.stroke;
+  cellGfx.opacity = cellStyle.opacity;
+  cellGfx.linewidth = cellStyle.lineWidth;
   gfx.add(cellGfx, text);
   return {
     instruction: instruction,
@@ -1592,12 +1592,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /* global Two: false */
 
-var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two, coords, cellConstructor) {
+var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two, coords, cellConstructor, menuConfig) {
 
-  var buttonWidth = 50;
-  var buttonHeight = 50;
-  var menuWidth = 250;
-  var menuHeight = 250;
+  var buttonWidth = menuConfig.buttonWidth;
+  var buttonHeight = menuConfig.buttonHeight;
+  var columns = menuConfig.buttonColumns;
+  var menuWidth = buttonWidth * columns;
+  var rows = Math.ceil(_instructions2.default.count / columns);
+  var menuHeight = rows * buttonHeight;
 
   var menu = {
     svg: two.makeGroup(),
@@ -1608,12 +1610,12 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
   var menubg = two.makeRectangle(coords.xPos, coords.yPos, menuWidth, menuHeight);
   menu.svg.add(menubg);
 
-  var xOffset = menubg.translation.x - 150;
-  var yOffset = menubg.translation.y - 150;
+  var xOffset = menubg.translation.x - menuWidth / 2 - buttonWidth / 2;
+  var yOffset = menubg.translation.y - menuHeight / 2 - buttonHeight / 2;
 
-  for (var x = 0; x < 5; x += 1) {
+  for (var x = 0; x < columns; x += 1) {
     var _loop = function _loop(y) {
-      var inst = _instructions2.default[y * 5 + x];
+      var inst = _instructions2.default[y * columns + x];
       if (inst) {
         var button = CellCreateButton(two, inst.symbol, function () {
           return cellConstructor(inst, coords);
@@ -1623,7 +1625,7 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
       }
     };
 
-    for (var y = 0; y < 5; y += 1) {
+    for (var y = 0; y < rows; y += 1) {
       _loop(y);
     }
   }
@@ -1717,6 +1719,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
+  count: 11,
   0: { symbol: '^' },
   1: { symbol: '>' },
   2: { symbol: 'v' },
@@ -1775,6 +1778,24 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 /* global Two: false */
 
+var gridConfig = {
+  xCells: 50,
+  yCells: 30,
+  cellSize: 70
+};
+var menuConfig = {
+  buttonWidth: 50,
+  buttonHeight: 50,
+  buttonColumns: 5
+};
+var cellStyle = {
+  fill: '#FF8000',
+  stroke: 'orangered',
+  lineWidth: 5,
+  opacity: 0.75,
+  textSize: 50
+};
+
 (function () {
   var two = new Two({
     type: Two.Types['svg'],
@@ -1782,7 +1803,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
     autostart: true
   }).appendTo(document.getElementById('app'));
 
-  var grid = Grid.create(two, 50, 30, 100);
+  var grid = Grid.create(two, gridConfig.xCells, gridConfig.yCells, gridConfig.cellSize);
   var cellGfx = two.makeGroup();
 
   var program = Program.create(grid, grid.gfx, cellGfx);
@@ -1799,7 +1820,7 @@ function addGridInteractivity(two, program) {
     e.preventDefault();
     var initial = two.scene.translation;
     var coords = Grid.getCoordinates(program.grid, e.clientX - initial.x, e.clientY - initial.y);
-    (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, program));
+    (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, program), menuConfig);
     two.update();
   });
 
@@ -1868,7 +1889,7 @@ var snapCellToGrid = function snapCellToGrid(grid, cell) {
 var cellConstructor = function cellConstructor(two, program) {
   return function (instruction, coords) {
 
-    var newCell = Cell.create(two, program.grid, coords.x, coords.y, instruction);
+    var newCell = Cell.create(two, program.grid, coords.x, coords.y, instruction, cellStyle);
     Program.addCell(program, coords.x, coords.y, newCell);
     two.update();
     addCellInteractivity(two, program, newCell);

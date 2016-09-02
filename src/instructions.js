@@ -1,5 +1,6 @@
 
 export default {
+  count: 11,
   0: {symbol: '^'},
   1: {symbol: '>'},
   2: {symbol: 'v'},
