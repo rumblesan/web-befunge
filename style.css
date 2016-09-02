@@ -1,10 +1,49 @@
-html, body {
-    width: 100%;
-    height: 100%;
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 0;
     margin: 0;
+}
+html {
+    height: 100%;
+    width: 100%;
+}
+body {
+    height: 100%;
+    width: 100%;
+    background: black;
+}
+#header {
+    width: 100%;
+    height: auto;
+    background-color: #000000;
+    color: #ffffff;
+    padding: 2px 0px;
+    z-index: 100;
+}
+#app, svg {
+    z-index: -1;
+}
+#controls {
+    font-family: monospace; line-height: 1.4em;
+    font-size: 1.2em;
+}
+.control-item {
+    padding: 2px 10px;
+}
+button {
+    background: white;
+    color: black;
+    border-radius: 4px;
+    padding: 2px;
+    margin: 2px;
+};
+span .numeric-text {
+    background-color: red;
 }
 canvas {
     display: block;
-    width: 100%;
-    height: 100%;
+    margin: 0px auto;
 }
+
