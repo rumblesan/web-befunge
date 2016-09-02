@@ -15,8 +15,7 @@ import {Grid, Cell} from './ui';
 
   two.update();
 
-  addWindowMovement(two, grid);
-  addNewCellInteractivity(two, grid, cells);
+  addGridInteractivity(two, grid, cells);
 
 })();
 
@@ -32,7 +31,8 @@ function getGridCoordinate (grid, xPos, yPos) {
   return {x: nearestX, y: nearestY};
 }
 
-function addNewCellInteractivity (two, grid, cells) {
+function addGridInteractivity (two, grid, cells) {
+
   grid.gfx._renderer.elem.addEventListener('dblclick', function (e) {
     e.preventDefault();
     var initial = two.scene.translation;
@@ -40,40 +40,10 @@ function addNewCellInteractivity (two, grid, cells) {
     var newCell = Cell(two, grid, gridCoords.x, gridCoords.y);
     cells.add(newCell);
     two.update();
-    addInteractivity(grid, newCell);
+    addCellInteractivity(grid, newCell);
   });
-}
 
-function addInteractivity (grid, shape) {
-
-  shape._renderer.elem.onmousedown = function (e) {
-    e.preventDefault();
-
-    var initial = shape.translation;
-    var xOffset = e.clientX - initial.x;
-    var yOffset = e.clientY - initial.y;
-
-    var drag = function (e) {
-      e.preventDefault();
-      shape.translation.set(e.clientX - xOffset, e.clientY - yOffset);
-    };
-
-    var dragEnd = function (e) {
-      e.preventDefault();
-      setToNearestSquare(grid, shape);
-      window.removeEventListener('mousemove', drag);
-      window.removeEventListener('mouseup', dragEnd);
-
-    };
-
-
-    window.addEventListener('mousemove', drag);
-    window.addEventListener('mouseup', dragEnd);
-  };
-}
-
-function addWindowMovement (two, grid) {
-  grid.gfx._renderer.elem.onmousedown = function (e) {
+  grid.gfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
 
     var initial = two.scene.translation;
@@ -93,6 +63,32 @@ function addWindowMovement (two, grid) {
 
     window.addEventListener('mousemove', drag);
     window.addEventListener('mouseup', dragEnd);
-  };
+  });
+}
 
+function addCellInteractivity (grid, cell) {
+
+  cell._renderer.elem.addEventListener('mousedown', function (e) {
+    e.preventDefault();
+
+    var initial = cell.translation;
+    var xOffset = e.clientX - initial.x;
+    var yOffset = e.clientY - initial.y;
+
+    var drag = function (e) {
+      e.preventDefault();
+      cell.translation.set(e.clientX - xOffset, e.clientY - yOffset);
+    };
+
+    var dragEnd = function (e) {
+      e.preventDefault();
+      setToNearestSquare(grid, cell);
+      window.removeEventListener('mousemove', drag);
+      window.removeEventListener('mouseup', dragEnd);
+    };
+
+
+    window.addEventListener('mousemove', drag);
+    window.addEventListener('mouseup', dragEnd);
+  });
 }
