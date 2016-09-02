@@ -1,5 +1,5 @@
 
-export const Grid = (two, xCells, yCells, cellSize) => {
+export const create = (two, xCells, yCells, cellSize) => {
   var gridGfx = two.makeGroup();
   var x, y;
   var width = xCells * cellSize;
@@ -34,11 +34,10 @@ export const Grid = (two, xCells, yCells, cellSize) => {
   return grid;
 };
 
-export const Cell = (two, grid, xPos, yPos) => {
-  var cell = two.makeRectangle((xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize, grid.cellSize, grid.cellSize);
-  cell.fill = '#FF8000';
-  cell.stroke = 'orangered';
-  cell.opacity = 0.75;
-  cell.linewidth = 5;
-  return cell;
+export const getCoordinate = (grid, xPos, yPos) => {
+  var nearestX = Math.floor(xPos / grid.cellSize);
+  var nearestY = Math.floor(yPos / grid.cellSize);
+  return {
+    x: nearestX, y: nearestY
+  };
 };
