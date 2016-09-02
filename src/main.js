@@ -1,6 +1,3 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
-
 /* global Two */
 
 (function () {
@@ -18,9 +15,10 @@
 
   addWindowMovement(two, grid);
   addNewCellInteractivity(two, grid, cells);
+
 })();
 
-function addNewCell(two, grid, cells, xPos, yPos) {
+function addNewCell (two, grid, cells, xPos, yPos) {
   var cell = two.makeRectangle((xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize, grid.cellSize, grid.cellSize);
   cell.fill = '#FF8000';
   cell.stroke = 'orangered';
@@ -31,7 +29,7 @@ function addNewCell(two, grid, cells, xPos, yPos) {
   addInteractivity(grid, cell);
 }
 
-function drawGrid(two, xCells, yCells, cellSize) {
+function drawGrid (two, xCells, yCells, cellSize) {
   var gridGfx = two.makeGroup();
   var x, y;
   var width = xCells * cellSize;
@@ -49,7 +47,7 @@ function drawGrid(two, xCells, yCells, cellSize) {
   }
 
   for (y = 0; y <= yCells; y += 1) {
-    line = two.makeLine(0, y * cellSize, width, y * cellSize);
+    line = two.makeLine(0, y * cellSize,  width, y * cellSize);
     line.stroke = 'black';
     gridGfx.add(line);
   }
@@ -66,19 +64,19 @@ function drawGrid(two, xCells, yCells, cellSize) {
   return grid;
 }
 
-function setToNearestSquare(grid, shape) {
+function setToNearestSquare (grid, shape) {
   var nearestX = (Math.round(shape.translation.x / grid.cellSize - 0.5) + 0.5) * grid.cellSize;
   var nearestY = (Math.round(shape.translation.y / grid.cellSize - 0.5) + 0.5) * grid.cellSize;
   shape.translation.set(nearestX, nearestY);
 }
 
-function getGridCoordinate(grid, xPos, yPos) {
+function getGridCoordinate (grid, xPos, yPos) {
   var nearestX = Math.round(xPos / grid.cellSize - 0.5);
   var nearestY = Math.round(yPos / grid.cellSize - 0.5);
-  return { x: nearestX, y: nearestY };
+  return {x: nearestX, y: nearestY};
 }
 
-function addNewCellInteractivity(two, grid, cells) {
+function addNewCellInteractivity (two, grid, cells) {
   grid.gfx._renderer.elem.addEventListener('dblclick', function (e) {
     e.preventDefault();
     var initial = two.scene.translation;
@@ -87,7 +85,7 @@ function addNewCellInteractivity(two, grid, cells) {
   });
 }
 
-function addInteractivity(grid, shape) {
+function addInteractivity (grid, shape) {
 
   shape._renderer.elem.onmousedown = function (e) {
     e.preventDefault();
@@ -96,24 +94,26 @@ function addInteractivity(grid, shape) {
     var xOffset = e.clientX - initial.x;
     var yOffset = e.clientY - initial.y;
 
-    var drag = function drag(e) {
+    var drag = function (e) {
       e.preventDefault();
       shape.translation.set(e.clientX - xOffset, e.clientY - yOffset);
     };
 
-    var dragEnd = function dragEnd(e) {
+    var dragEnd = function (e) {
       e.preventDefault();
       setToNearestSquare(grid, shape);
       window.removeEventListener('mousemove', drag);
       window.removeEventListener('mouseup', dragEnd);
+
     };
+
 
     window.addEventListener('mousemove', drag);
     window.addEventListener('mouseup', dragEnd);
   };
 }
 
-function addWindowMovement(two, grid) {
+function addWindowMovement (two, grid) {
   grid.gfx._renderer.elem.onmousedown = function (e) {
     e.preventDefault();
 
@@ -121,12 +121,12 @@ function addWindowMovement(two, grid) {
     var xOffset = e.clientX - initial.x;
     var yOffset = e.clientY - initial.y;
 
-    var drag = function drag(e) {
+    var drag = function (e) {
       e.preventDefault();
       two.scene.translation.set(e.clientX - xOffset, e.clientY - yOffset);
     };
 
-    var dragEnd = function dragEnd(e) {
+    var dragEnd = function (e) {
       e.preventDefault();
       window.removeEventListener('mousemove', drag);
       window.removeEventListener('mouseup', dragEnd);
@@ -135,6 +135,5 @@ function addWindowMovement(two, grid) {
     window.addEventListener('mousemove', drag);
     window.addEventListener('mouseup', dragEnd);
   };
-}
 
-},{}]},{},[1]);
+}
