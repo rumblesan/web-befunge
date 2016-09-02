@@ -5,12 +5,13 @@ import _ from 'underscore';
 
 export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
+  const style = menuConfig.style;
   const buttonWidth = menuConfig.buttonWidth;
   const buttonHeight = menuConfig.buttonHeight;
   const columns = menuConfig.buttonColumns;
-  const menuWidth = buttonWidth * columns;
+  const menuWidth = (buttonWidth * columns) + style.padding;
   const rows = Math.ceil(Instructions.count / columns);
-  const menuHeight = rows * buttonHeight;
+  const menuHeight = rows * buttonHeight + style.padding;
 
   const menu = {
     svg: two.makeGroup(),
@@ -21,8 +22,8 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
   const menubg = two.makeRectangle(coords.xPos, coords.yPos, menuWidth, menuHeight);
   menu.svg.add(menubg);
 
-  const xOffset = menubg.translation.x - (menuWidth / 2) - (buttonWidth / 2);
-  const yOffset = menubg.translation.y - (menuHeight / 2) - (buttonHeight / 2);
+  const xOffset = menubg.translation.x - ((menuWidth / 2) + (buttonWidth / 2) - (style.padding / 2));
+  const yOffset = menubg.translation.y - ((menuHeight / 2) + (buttonHeight / 2) - (style.padding / 2));
 
   for (let x = 0; x < columns; x += 1) {
     for (let y = 0; y < rows; y += 1) {
@@ -33,7 +34,8 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
           inst.symbol,
           ()=> cellConstructor(inst, coords),
           xOffset + ((x + 1) * buttonWidth),
-          yOffset + ((y + 1) * buttonHeight)
+          yOffset + ((y + 1) * buttonHeight),
+          menuConfig
         );
         menu.svg.add(button.svg);
         menu.buttons.push(button);
@@ -68,11 +70,15 @@ const menuInteraction = (menu) => {
 };
 
 
-const CellCreateButton = (two, message, clickHandler, xPos, yPos, size) => {
-  const svg = two.makeGroup(
-    new Two.Text(message, xPos, yPos),
-    two.makeRectangle(xPos, yPos, size, size)
+const CellCreateButton = (two, message, clickHandler, xPos, yPos, config) => {
+  const rect = two.makeRectangle(
+    xPos,
+    yPos,
+    config.buttonWidth - config.style.padding,
+    config.buttonHeight - config.style.padding
   );
+  rect.linewidth = config.style.linewidth;
+  const svg = two.makeGroup(rect, new Two.Text(message, xPos, yPos));
   return {
     click: clickHandler,
     svg: svg

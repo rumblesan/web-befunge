@@ -10,18 +10,26 @@ import {cellCreationMenu} from './creationMenu';
 const gridConfig = {
   xCells: 50,
   yCells: 30,
-  cellSize: 70
+  cellSize: 70,
+  style: {
+    stroke: 'black',
+    background: 'white',
+    linewidth: 2
+  }
 };
 const menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
-  buttonColumns: 5
+  buttonColumns: 5,
+  style: {
+    padding: 4,
+    linewidth: 2
+  }
 };
 const cellStyle = {
   fill: '#FF8000',
   stroke: 'orangered',
-  lineWidth: 5,
-  opacity: 0.75,
+  linewidth: 5,
   textSize: 50
 };
 
@@ -32,12 +40,7 @@ const cellStyle = {
     autostart: true
   }).appendTo(document.getElementById('app'));
 
-  const grid = Grid.create(
-    two,
-    gridConfig.xCells,
-    gridConfig.yCells,
-    gridConfig.cellSize
-  );
+  const grid = Grid.create(two, gridConfig);
   const cellGfx = two.makeGroup();
 
   const program = Program.create(grid, grid.gfx, cellGfx);

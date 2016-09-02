@@ -16,8 +16,7 @@ export const create = (two, grid, xPos, yPos, instruction, cellStyle) => {
   );
   cellGfx.fill = cellStyle.fill;
   cellGfx.stroke = cellStyle.stroke;
-  cellGfx.opacity = cellStyle.opacity;
-  cellGfx.linewidth = cellStyle.lineWidth;
+  cellGfx.linewidth = cellStyle.linewidth;
   gfx.add(cellGfx, text);
   return {
     instruction: instruction,

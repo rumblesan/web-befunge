@@ -1563,8 +1563,7 @@ var create = exports.create = function create(two, grid, xPos, yPos, instruction
   var cellGfx = two.makeRectangle((xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize, grid.cellSize, grid.cellSize);
   cellGfx.fill = cellStyle.fill;
   cellGfx.stroke = cellStyle.stroke;
-  cellGfx.opacity = cellStyle.opacity;
-  cellGfx.linewidth = cellStyle.lineWidth;
+  cellGfx.linewidth = cellStyle.linewidth;
   gfx.add(cellGfx, text);
   return {
     instruction: instruction,
@@ -1594,12 +1593,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two, coords, cellConstructor, menuConfig) {
 
+  var style = menuConfig.style;
   var buttonWidth = menuConfig.buttonWidth;
   var buttonHeight = menuConfig.buttonHeight;
   var columns = menuConfig.buttonColumns;
-  var menuWidth = buttonWidth * columns;
+  var menuWidth = buttonWidth * columns + style.padding;
   var rows = Math.ceil(_instructions2.default.count / columns);
-  var menuHeight = rows * buttonHeight;
+  var menuHeight = rows * buttonHeight + style.padding;
 
   var menu = {
     svg: two.makeGroup(),
@@ -1610,8 +1610,8 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
   var menubg = two.makeRectangle(coords.xPos, coords.yPos, menuWidth, menuHeight);
   menu.svg.add(menubg);
 
-  var xOffset = menubg.translation.x - menuWidth / 2 - buttonWidth / 2;
-  var yOffset = menubg.translation.y - menuHeight / 2 - buttonHeight / 2;
+  var xOffset = menubg.translation.x - (menuWidth / 2 + buttonWidth / 2 - style.padding / 2);
+  var yOffset = menubg.translation.y - (menuHeight / 2 + buttonHeight / 2 - style.padding / 2);
 
   for (var x = 0; x < columns; x += 1) {
     var _loop = function _loop(y) {
@@ -1619,7 +1619,7 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
       if (inst) {
         var button = CellCreateButton(two, inst.symbol, function () {
           return cellConstructor(inst, coords);
-        }, xOffset + (x + 1) * buttonWidth, yOffset + (y + 1) * buttonHeight);
+        }, xOffset + (x + 1) * buttonWidth, yOffset + (y + 1) * buttonHeight, menuConfig);
         menu.svg.add(button.svg);
         menu.buttons.push(button);
       }
@@ -1655,8 +1655,10 @@ var menuInteraction = function menuInteraction(menu) {
   menu.svg._renderer.elem.addEventListener('mouseleave', closeMenu);
 };
 
-var CellCreateButton = function CellCreateButton(two, message, clickHandler, xPos, yPos, size) {
-  var svg = two.makeGroup(new Two.Text(message, xPos, yPos), two.makeRectangle(xPos, yPos, size, size));
+var CellCreateButton = function CellCreateButton(two, message, clickHandler, xPos, yPos, config) {
+  var rect = two.makeRectangle(xPos, yPos, config.buttonWidth - config.style.padding, config.buttonHeight - config.style.padding);
+  rect.linewidth = config.style.linewidth;
+  var svg = two.makeGroup(rect, new Two.Text(message, xPos, yPos));
   return {
     click: clickHandler,
     svg: svg
@@ -1664,31 +1666,38 @@ var CellCreateButton = function CellCreateButton(two, message, clickHandler, xPo
 };
 
 },{"./instructions":5,"underscore":1}],4:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var create = exports.create = function create(two, xCells, yCells, cellSize) {
+var create = exports.create = function create(two, config) {
+  var xCells = config.xCells;
+  var yCells = config.yCells;
+  var cellSize = config.cellSize;
+  var style = config.style;
+
   var gridGfx = two.makeGroup();
   var x, y;
   var width = xCells * cellSize;
   var height = yCells * cellSize;
 
   var background = two.makeRectangle(width / 2, height / 2, width, height);
-  background.fill = 'white';
+  background.fill = style.background;
   gridGfx.add(background);
 
   var line;
   for (x = 0; x <= xCells; x += 1) {
     line = two.makeLine(x * cellSize, 0, x * cellSize, height);
-    line.stroke = 'black';
+    line.stroke = style.stroke;
+    line.linewidth = style.linewidth;
     gridGfx.add(line);
   }
 
   for (y = 0; y <= yCells; y += 1) {
     line = two.makeLine(0, y * cellSize, width, y * cellSize);
-    line.stroke = 'black';
+    line.stroke = style.stroke;
+    line.linewidth = style.linewidth;
     gridGfx.add(line);
   }
 
@@ -1781,18 +1790,26 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 var gridConfig = {
   xCells: 50,
   yCells: 30,
-  cellSize: 70
+  cellSize: 70,
+  style: {
+    stroke: 'black',
+    background: 'white',
+    linewidth: 2
+  }
 };
 var menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
-  buttonColumns: 5
+  buttonColumns: 5,
+  style: {
+    padding: 4,
+    linewidth: 2
+  }
 };
 var cellStyle = {
   fill: '#FF8000',
   stroke: 'orangered',
-  lineWidth: 5,
-  opacity: 0.75,
+  linewidth: 5,
   textSize: 50
 };
 
@@ -1803,7 +1820,7 @@ var cellStyle = {
     autostart: true
   }).appendTo(document.getElementById('app'));
 
-  var grid = Grid.create(two, gridConfig.xCells, gridConfig.yCells, gridConfig.cellSize);
+  var grid = Grid.create(two, gridConfig);
   var cellGfx = two.makeGroup();
 
   var program = Program.create(grid, grid.gfx, cellGfx);
