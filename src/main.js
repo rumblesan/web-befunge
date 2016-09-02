@@ -2,7 +2,7 @@
 
 import * as Grid from './grid';
 
-import {cellCreationMenu} from './cellUI';
+import {cellCreationMenu} from './creationMenu';
 
 (function () {
   var two = new Two({
