@@ -34,7 +34,7 @@ export const create = (two, xCells, yCells, cellSize) => {
   return grid;
 };
 
-export const getCoordinate = (grid, xPos, yPos) => {
+export const getCoordinates = (grid, xPos, yPos) => {
   var nearestX = Math.floor(xPos / grid.cellSize);
   var nearestY = Math.floor(yPos / grid.cellSize);
   return {
