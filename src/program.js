@@ -10,6 +10,7 @@ export const create = (grid, gridGfx, cellGfx) => {
 
 export const addCell = (program, x, y, cell) => {
   program.cells[[x, y]] = cell;
+  program.cellGfx.add(cell.gfx);
 };
 
 export const getCell = (program, x, y) => {

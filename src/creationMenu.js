@@ -1,82 +1,78 @@
-import * as Grid from './grid';
-import * as Cell from './cell';
+/* global Two: false */
 
-export const cellCreationMenu = (two, grid, cells, xPos, yPos) => {
+import Instructions from './instructions';
+import _ from 'underscore';
 
-  var menuItems = two.makeGroup();
+export const cellCreationMenu = (two, coords, cellConstructor) => {
 
-  var menu = two.makeRectangle(xPos, yPos, 250, 250);
-  menuItems.add(menu);
+  const buttonWidth = 50;
+  const buttonHeight = 50;
+  const menuWidth = 250;
+  const menuHeight = 250;
 
-  const xOffset = menu.translation.x - 150;
-  const yOffset = menu.translation.y - 150;
-  let button;
-  const buttonSize = 50;
-  let x, y;
-  for (x = 0; x < 5; x += 1) {
-    for (y = 0; y < 5; y += 1) {
-      button = two.makeRectangle(xOffset + ((x + 1) * buttonSize), yOffset + ((y + 1) * buttonSize), buttonSize, buttonSize);
-      menuItems.add(button);
+  const menu = {
+    svg: two.makeGroup(),
+    buttons: []
+  };
+
+  // Menu background
+  const menubg = two.makeRectangle(coords.xPos, coords.yPos, menuWidth, menuHeight);
+  menu.svg.add(menubg);
+
+  const xOffset = menubg.translation.x - 150;
+  const yOffset = menubg.translation.y - 150;
+
+  for (let x = 0; x < 5; x += 1) {
+    for (let y = 0; y < 5; y += 1) {
+      let inst = Instructions[(y * 5) + x];
+      if (inst) {
+        let button = CellCreateButton(
+          two,
+          inst.symbol,
+          ()=> cellConstructor(inst, coords),
+          xOffset + ((x + 1) * buttonWidth),
+          yOffset + ((y + 1) * buttonHeight)
+        );
+        menu.svg.add(button.svg);
+        menu.buttons.push(button);
+      }
     }
   }
 
   two.update();
-  menuInteraction(two, grid, menu, menuItems, cells, xPos, yPos);
+  menuInteraction(menu);
   return menu;
 
 };
 
-const menuInteraction = (two, grid, menu, menuItems, cells, xPos, yPos) => {
-  var initial = two.scene.translation;
-  var gridCoords = Grid.getCoordinates(grid, xPos - initial.x, yPos - initial.y);
+const menuInteraction = (menu) => {
   const closeMenu = function () {
-    menuItems._renderer.elem.removeEventListener('mouseleave', closeMenu);
-    menuItems.remove();
-
-    var newCell = Cell.create(two, grid, gridCoords.x, gridCoords.y);
-    cells.add(newCell);
-    two.update();
-    addCellInteractivity(two, grid, newCell);
+    menu.svg._renderer.elem.removeEventListener('mouseleave', closeMenu);
+    _.each(menu.buttons, (b) => {
+      b.svg._renderer.elem.removeEventListener('click', b.action);
+    });
+    menu.svg.remove();
   };
-  menuItems._renderer.elem.addEventListener('mouseleave', closeMenu);
+
+  _.each(menu.buttons, (b) => {
+    b.action = () => {
+      b.click();
+      closeMenu();
+    };
+    b.svg._renderer.elem.addEventListener('click', b.action);
+  });
+
+  menu.svg._renderer.elem.addEventListener('mouseleave', closeMenu);
 };
 
-function addCellInteractivity (two, grid, cell) {
 
-  cell._renderer.elem.addEventListener('mousedown', function (e) {
-    e.preventDefault();
-
-    var initial = cell.translation;
-    var xOffset = e.clientX - initial.x;
-    var yOffset = e.clientY - initial.y;
-
-    var drag = function (e) {
-      e.preventDefault();
-      cell.translation.set(e.clientX - xOffset, e.clientY - yOffset);
-    };
-
-    var dragEnd = function (e) {
-      e.preventDefault();
-      snapCellToGrid(grid, cell);
-      window.removeEventListener('mousemove', drag);
-      window.removeEventListener('mouseup', dragEnd);
-    };
-
-
-    window.addEventListener('mousemove', drag);
-    window.addEventListener('mouseup', dragEnd);
-  });
-
-  cell._renderer.elem.addEventListener('dblclick', function (e) {
-    e.preventDefault();
-
-    cellCreationMenu(two, grid, cell, e.clientX, e.clientY);
-    two.update();
-
-  });
-}
-
-function snapCellToGrid (grid, cell) {
-  var coords = Grid.getCoordinates(grid, cell.translation.x, cell.translation.y);
-  cell.translation.set((coords.x + 0.5) * grid.cellSize, (coords.y + 0.5) * grid.cellSize);
-}
+const CellCreateButton = (two, message, clickHandler, xPos, yPos, size) => {
+  const svg = two.makeGroup(
+    new Two.Text(message, xPos, yPos),
+    two.makeRectangle(xPos, yPos, size, size)
+  );
+  return {
+    click: clickHandler,
+    svg: svg
+  };
+};

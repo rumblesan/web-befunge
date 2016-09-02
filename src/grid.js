@@ -38,6 +38,6 @@ export const getCoordinates = (grid, xPos, yPos) => {
   var nearestX = Math.floor(xPos / grid.cellSize);
   var nearestY = Math.floor(yPos / grid.cellSize);
   return {
-    x: nearestX, y: nearestY
+    x: nearestX, y: nearestY, xPos: xPos, yPos: yPos
   };
 };
