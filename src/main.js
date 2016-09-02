@@ -19,16 +19,17 @@ import {Grid, Cell} from './ui';
 
 })();
 
-function setToNearestSquare (grid, shape) {
-  var nearestX = (Math.round(shape.translation.x / grid.cellSize - 0.5) + 0.5) * grid.cellSize;
-  var nearestY = (Math.round(shape.translation.y / grid.cellSize - 0.5) + 0.5) * grid.cellSize;
-  shape.translation.set(nearestX, nearestY);
+function snapCellToGrid (grid, cell) {
+  var coords = getGridCoordinate(grid, cell.translation.x, cell.translation.y);
+  cell.translation.set((coords.x + 0.5) * grid.cellSize, (coords.y + 0.5) * grid.cellSize);
 }
 
 function getGridCoordinate (grid, xPos, yPos) {
-  var nearestX = Math.round(xPos / grid.cellSize - 0.5);
-  var nearestY = Math.round(yPos / grid.cellSize - 0.5);
-  return {x: nearestX, y: nearestY};
+  var nearestX = Math.floor(xPos / grid.cellSize);
+  var nearestY = Math.floor(yPos / grid.cellSize);
+  return {
+    x: nearestX, y: nearestY
+  };
 }
 
 function addGridInteractivity (two, grid, cells) {
@@ -82,7 +83,7 @@ function addCellInteractivity (grid, cell) {
 
     var dragEnd = function (e) {
       e.preventDefault();
-      setToNearestSquare(grid, cell);
+      snapCellToGrid(grid, cell);
       window.removeEventListener('mousemove', drag);
       window.removeEventListener('mouseup', dragEnd);
     };
