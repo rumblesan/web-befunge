@@ -11,12 +11,31 @@ export const create = (interpreter, grid, gridGfx, cellGfx, pointerGfx) => {
 };
 
 export const addCell = (befunge, x, y, cell) => {
-  befunge.interpreter.cells[[x, y]] = cell.instruction;
+  befunge.interpreter.cellPositions[[x, y]] = cell;
+  befunge.interpreter.cells[cell] = [x, y];
   befunge.cellGfx.add(cell.gfx);
 };
 
 export const getCell = (befunge, x, y) => {
-  return befunge.interpreter.cells[[x, y]];
+  return befunge.interpreter.cellPositions[[x, y]];
+};
+
+export const startMovingCell = (befunge, cell) => {
+  const coords = befunge.interpreter.cells[cell];
+  befunge.interpreter.cellPositions[coords] = null;
+  return cell;
+};
+
+export const finishMovingCell = (befunge, x, y, cell) => {
+  befunge.interpreter.cells[cell] = [x, y];
+  befunge.interpreter.cellPositions[[x, y]] = cell;
+};
+
+export const deleteCell = (befunge, cell) => {
+  cell.gfx.remove();
+  const coords = befunge.interpreter.cells[cell];
+  delete(befunge.interpreter.cellPositions[coords]);
+  delete(befunge.interpreter.cells[cell]);
 };
 
 export const start = (befunge) => {

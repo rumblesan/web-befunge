@@ -7,6 +7,7 @@ export const create = () => {
   const pointer = Pointer.create();
 
   const interpreter = {
+    cellPositions: {},
     cells: {},
     timer: null,
     pointer: pointer,
@@ -29,7 +30,7 @@ const evaluate = (interpreter, cell) => {
   if (cell === undefined) {
     return;
   }
-  switch (cell.symbol) {
+  switch (cell.instruction.symbol) {
   case '^':
     interpreter.pointer.direction = Pointer.Directions.up;
     break;
