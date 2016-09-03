@@ -1754,22 +1754,15 @@ var _program = require('./program');
 
 var Program = _interopRequireWildcard(_program);
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _pointer = require('./pointer');
 
-var Directions = {
-  up: 'up',
-  right: 'right',
-  down: 'down',
-  left: 'left'
-};
+var Pointer = _interopRequireWildcard(_pointer);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 var create = exports.create = function create() {
 
-  var pointer = {
-    x: 0,
-    y: 0,
-    direction: Directions.right
-  };
+  var pointer = Pointer.create();
 
   var interpreter = {
     timer: null,
@@ -1797,7 +1790,7 @@ var interpret = function interpret(interpreter, program) {
 
   var cell = Program.getCell(program, x, y);
   evaluate(interpreter, cell);
-  movePointer(interpreter, program);
+  Pointer.move(interpreter.pointer, program.grid);
   console.log('tick', interpreter, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
@@ -1807,47 +1800,70 @@ var evaluate = function evaluate(interpreter, cell) {
   }
   switch (cell.instruction.symbol) {
     case '^':
-      interpreter.pointer.direction = Directions.up;
+      interpreter.pointer.direction = Pointer.Directions.up;
       break;
     case '>':
-      interpreter.pointer.direction = Directions.right;
+      interpreter.pointer.direction = Pointer.Directions.right;
       break;
     case 'v':
-      interpreter.pointer.direction = Directions.down;
+      interpreter.pointer.direction = Pointer.Directions.down;
       break;
     case '<':
-      interpreter.pointer.direction = Directions.left;
+      interpreter.pointer.direction = Pointer.Directions.left;
       break;
     default:
     // NOP
   }
 };
 
-var movePointer = function movePointer(interpreter, program) {
-  var pointer = interpreter.pointer;
+},{"./pointer":7,"./program":8}],7:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Directions = exports.Directions = {
+  up: 'up',
+  right: 'right',
+  down: 'down',
+  left: 'left'
+};
+
+var create = exports.create = function create() {
+
+  var pointer = {
+    x: 0,
+    y: 0,
+    direction: Directions.right
+  };
+
+  return pointer;
+};
+
+var move = exports.move = function move(pointer, grid) {
   switch (pointer.direction) {
     case Directions.up:
       pointer.y -= 1;
       if (pointer.y < 0) {
-        pointer.y = program.grid.yCells - 1;
+        pointer.y = grid.yCells - 1;
       }
       break;
     case Directions.right:
       pointer.x += 1;
-      if (pointer.x >= program.grid.xCells) {
+      if (pointer.x >= grid.xCells) {
         pointer.x = 0;
       }
       break;
     case Directions.down:
       pointer.y += 1;
-      if (pointer.y >= program.grid.yCells) {
+      if (pointer.y >= grid.yCells) {
         pointer.y = 0;
       }
       break;
     case Directions.left:
       pointer.x -= 1;
       if (pointer.x < 0) {
-        pointer.x = program.grid.xCells - 1;
+        pointer.x = grid.xCells - 1;
       }
       break;
     default:
@@ -1855,7 +1871,7 @@ var movePointer = function movePointer(interpreter, program) {
   }
 };
 
-},{"./program":7}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1879,7 +1895,7 @@ var getCell = exports.getCell = function getCell(program, x, y) {
   return program.cells[[x, y]];
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var _program = require('./program');
@@ -2031,4 +2047,4 @@ var cellConstructor = function cellConstructor(two, program) {
   };
 };
 
-},{"./cell":2,"./creationMenu":3,"./grid":4,"./interpreter":6,"./program":7}]},{},[8]);
+},{"./cell":2,"./creationMenu":3,"./grid":4,"./interpreter":6,"./program":8}]},{},[9]);
