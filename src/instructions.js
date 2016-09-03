@@ -1,30 +1,30 @@
 
+const inst = (c) => {
+  return {symbol: c, instruction: c, value: c.charCodeAt()};
+};
 export default {
-  count: 11,
+  count: 16,
   charInst: (c) => {
-    return {
-      symbol: c,
-      instruction: 'c',
-      value: c
-    };
+    return {symbol: c, instruction: 'c', value: c.charCodeAt()};
   },
   intInst: (i) => {
-    return {
-      symbol: i,
-      instruction: 'i',
-      value: parseInt(i, 10)
-    };
+    return {symbol: i, instruction: 'i', value: parseInt(i, 10)};
   },
-  0: {symbol: '^', instruction: '^'},
-  1: {symbol: '>', instruction: '>'},
-  2: {symbol: 'v', instruction: 'v'},
-  3: {symbol: '<', instruction: '<'},
-  4: {symbol: '_', instruction: '_'},
-  5: {symbol: '|', instruction: '|'},
-  6: {symbol: '@', instruction: '@'},
-  7: {symbol: '+', instruction: '+'},
-  8: {symbol: '-', instruction: '-'},
-  9: {symbol: '*', instruction: '*'},
-  10: {symbol: '/', instruction: '/'}
+  0: inst('^'),
+  1: inst('>'),
+  2: inst('v'),
+  3: inst('<'),
+  4: inst('_'),
+  5: inst('|'),
+  6: inst('@'),
+  7: inst('+'),
+  8: inst('-'),
+  9: inst('*'),
+  10: inst('/'),
+  11: inst(':'),
+  12: inst('\\'),
+  13: inst('"'),
+  14: inst('.'),
+  15: inst(',')
 };
 
