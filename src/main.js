@@ -1,5 +1,7 @@
 /* global Two: false */
 
+import "babel-polyfill";
+
 import * as Befunge from './befunge';
 
 import * as Grid    from './grid';
