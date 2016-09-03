@@ -23,7 +23,6 @@ export const interpret = (befunge) => {
   const cell = Befunge.getCell(befunge, pointer.x, pointer.y);
   evaluate(interpreter, cell);
   Pointer.move(pointer, grid);
-  console.log('tick', interpreter, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
 const evaluate = (interpreter, cell) => {
@@ -46,4 +45,5 @@ const evaluate = (interpreter, cell) => {
   default:
     // NOP
   }
+  console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
