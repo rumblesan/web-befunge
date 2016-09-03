@@ -108,7 +108,7 @@ const addCellInteractivity = (two, befunge, cell) => {
       const newY = ((coords.y + 0.5) * befunge.grid.cellSize);
 
       cell.gfx.translation.set(newX, newY);
-      //Befunge.finishMovingCell(befunge, coords.x, coords.y, cell);
+      Befunge.finishMovingCell(befunge, coords.x, coords.y, cell);
       window.removeEventListener('mousemove', drag);
       window.removeEventListener('mouseup', dragEnd);
     };
@@ -141,10 +141,7 @@ const cellConstructor = (two, befunge) => {
 
   const interpreter = Interpreter.create();
   const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
-  //Befunge.start(befunge);
-
-
-  window.two = two;
+  Befunge.start(befunge);
 
   two.update();
 

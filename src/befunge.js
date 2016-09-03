@@ -12,7 +12,7 @@ export const create = (interpreter, grid, gridGfx, cellGfx, pointerGfx) => {
 
 export const addCell = (befunge, x, y, cell) => {
   befunge.interpreter.cellPositions[[x, y]] = cell;
-  befunge.interpreter.cells[cell] = [x, y];
+  befunge.interpreter.cells.set(cell, [x, y]);
   befunge.cellGfx.add(cell.gfx);
 };
 
@@ -21,19 +21,19 @@ export const getCell = (befunge, x, y) => {
 };
 
 export const startMovingCell = (befunge, cell) => {
-  const coords = befunge.interpreter.cells[cell];
-  befunge.interpreter.cellPositions[coords] = null;
+  const coords = befunge.interpreter.cells.get(cell);
+  befunge.interpreter.cellPositions[coords] = undefined;
   return cell;
 };
 
 export const finishMovingCell = (befunge, x, y, cell) => {
-  befunge.interpreter.cells[cell] = [x, y];
+  befunge.interpreter.cells.set(cell, [x, y]);
   befunge.interpreter.cellPositions[[x, y]] = cell;
 };
 
 export const deleteCell = (befunge, cell) => {
   cell.gfx.remove();
-  const coords = befunge.interpreter.cells[cell];
+  const coords = befunge.interpreter.cells.get(cell);
   delete(befunge.interpreter.cellPositions[coords]);
   delete(befunge.interpreter.cells[cell]);
 };

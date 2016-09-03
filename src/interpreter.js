@@ -8,7 +8,7 @@ export const create = () => {
 
   const interpreter = {
     cellPositions: {},
-    cells: {},
+    cells: new Map(),
     timer: null,
     pointer: pointer,
     speed: 500
