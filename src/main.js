@@ -2,8 +2,9 @@
 
 import * as Program from './program';
 
-import * as Grid from './grid';
-import * as Cell from './cell';
+import * as Grid    from './grid';
+import * as GridGFX from './gridGfx';
+import * as Cell    from './cell';
 import * as Interpreter from './interpreter';
 
 import {cellCreationMenu} from './creationMenu';
@@ -41,10 +42,11 @@ const cellStyle = {
     autostart: true
   }).appendTo(document.getElementById('app'));
 
-  const grid = Grid.create(two, gridConfig);
+  const grid = Grid.create(gridConfig);
+  const gridGfx = GridGFX.create(two, gridConfig);
   const cellGfx = two.makeGroup();
 
-  const program = Program.create(grid, grid.gfx, cellGfx);
+  const program = Program.create(grid, gridGfx, cellGfx);
   const interpreter = Interpreter.create();
   Interpreter.start(program, interpreter);
 
@@ -57,7 +59,7 @@ const cellStyle = {
 
 function addGridInteractivity (two, program) {
 
-  program.grid.gfx._renderer.elem.addEventListener('dblclick', function (e) {
+  program.gridGfx._renderer.elem.addEventListener('dblclick', function (e) {
     e.preventDefault();
     const initial = two.scene.translation;
     const coords = Grid.getCoordinates(program.grid, e.clientX - initial.x, e.clientY - initial.y);
@@ -65,7 +67,7 @@ function addGridInteractivity (two, program) {
     two.update();
   });
 
-  program.grid.gfx._renderer.elem.addEventListener('mousedown', function (e) {
+  program.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
 
     const initial = two.scene.translation;

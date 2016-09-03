@@ -1665,49 +1665,18 @@ var CellCreateButton = function CellCreateButton(two, message, clickHandler, xPo
   };
 };
 
-},{"./instructions":5,"underscore":1}],4:[function(require,module,exports){
+},{"./instructions":6,"underscore":1}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var create = exports.create = function create(two, config) {
-  var xCells = config.xCells;
-  var yCells = config.yCells;
-  var cellSize = config.cellSize;
-  var style = config.style;
-
-  var gridGfx = two.makeGroup();
-  var x, y;
-  var width = xCells * cellSize;
-  var height = yCells * cellSize;
-
-  var background = two.makeRectangle(width / 2, height / 2, width, height);
-  background.fill = style.background;
-  gridGfx.add(background);
-
-  var line;
-  for (x = 0; x <= xCells; x += 1) {
-    line = two.makeLine(x * cellSize, 0, x * cellSize, height);
-    line.stroke = style.stroke;
-    line.linewidth = style.linewidth;
-    gridGfx.add(line);
-  }
-
-  for (y = 0; y <= yCells; y += 1) {
-    line = two.makeLine(0, y * cellSize, width, y * cellSize);
-    line.stroke = style.stroke;
-    line.linewidth = style.linewidth;
-    gridGfx.add(line);
-  }
+var create = exports.create = function create(config) {
 
   var grid = {
-    gfx: gridGfx,
-    width: width,
-    height: height,
-    xCells: xCells,
-    yCells: yCells,
-    cellSize: cellSize
+    xCells: config.xCells,
+    yCells: config.yCells,
+    cellSize: config.cellSize
   };
 
   return grid;
@@ -1722,6 +1691,45 @@ var getCoordinates = exports.getCoordinates = function getCoordinates(grid, xPos
 };
 
 },{}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var create = exports.create = function create(two, config) {
+  var xCells = config.xCells;
+  var yCells = config.yCells;
+  var cellSize = config.cellSize;
+  var style = config.style;
+
+
+  var gridGfx = two.makeGroup();
+  var width = xCells * cellSize;
+  var height = yCells * cellSize;
+
+  var background = two.makeRectangle(width / 2, height / 2, width, height);
+  background.fill = style.background;
+  gridGfx.add(background);
+
+  var line = void 0;
+  for (var x = 0; x <= xCells; x += 1) {
+    line = two.makeLine(x * cellSize, 0, x * cellSize, height);
+    line.stroke = style.stroke;
+    line.linewidth = style.linewidth;
+    gridGfx.add(line);
+  }
+
+  for (var y = 0; y <= yCells; y += 1) {
+    line = two.makeLine(0, y * cellSize, width, y * cellSize);
+    line.stroke = style.stroke;
+    line.linewidth = style.linewidth;
+    gridGfx.add(line);
+  }
+
+  return gridGfx;
+};
+
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1742,7 +1750,7 @@ exports.default = {
   10: { symbol: '/' }
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1816,7 +1824,7 @@ var evaluate = function evaluate(interpreter, cell) {
   }
 };
 
-},{"./pointer":7,"./program":8}],7:[function(require,module,exports){
+},{"./pointer":8,"./program":9}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1871,7 +1879,7 @@ var move = exports.move = function move(pointer, grid) {
   }
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1895,7 +1903,7 @@ var getCell = exports.getCell = function getCell(program, x, y) {
   return program.cells[[x, y]];
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var _program = require('./program');
@@ -1905,6 +1913,10 @@ var Program = _interopRequireWildcard(_program);
 var _grid = require('./grid');
 
 var Grid = _interopRequireWildcard(_grid);
+
+var _gridGfx = require('./gridGfx');
+
+var GridGFX = _interopRequireWildcard(_gridGfx);
 
 var _cell = require('./cell');
 
@@ -1918,6 +1930,8 @@ var _creationMenu = require('./creationMenu');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
+/* global Two: false */
+
 var gridConfig = {
   xCells: 50,
   yCells: 30,
@@ -1927,8 +1941,7 @@ var gridConfig = {
     background: 'white',
     linewidth: 2
   }
-}; /* global Two: false */
-
+};
 var menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
@@ -1952,10 +1965,11 @@ var cellStyle = {
     autostart: true
   }).appendTo(document.getElementById('app'));
 
-  var grid = Grid.create(two, gridConfig);
+  var grid = Grid.create(gridConfig);
+  var gridGfx = GridGFX.create(two, gridConfig);
   var cellGfx = two.makeGroup();
 
-  var program = Program.create(grid, grid.gfx, cellGfx);
+  var program = Program.create(grid, gridGfx, cellGfx);
   var interpreter = Interpreter.create();
   Interpreter.start(program, interpreter);
 
@@ -1967,7 +1981,7 @@ var cellStyle = {
 
 function addGridInteractivity(two, program) {
 
-  program.grid.gfx._renderer.elem.addEventListener('dblclick', function (e) {
+  program.gridGfx._renderer.elem.addEventListener('dblclick', function (e) {
     e.preventDefault();
     var initial = two.scene.translation;
     var coords = Grid.getCoordinates(program.grid, e.clientX - initial.x, e.clientY - initial.y);
@@ -1975,7 +1989,7 @@ function addGridInteractivity(two, program) {
     two.update();
   });
 
-  program.grid.gfx._renderer.elem.addEventListener('mousedown', function (e) {
+  program.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
 
     var initial = two.scene.translation;
@@ -2047,4 +2061,4 @@ var cellConstructor = function cellConstructor(two, program) {
   };
 };
 
-},{"./cell":2,"./creationMenu":3,"./grid":4,"./interpreter":6,"./program":8}]},{},[9]);
+},{"./cell":2,"./creationMenu":3,"./grid":4,"./gridGfx":5,"./interpreter":7,"./program":9}]},{},[10]);
