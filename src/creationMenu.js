@@ -19,11 +19,11 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
   };
 
   // Menu background
-  const menubg = two.makeRectangle(coords.xPos, coords.yPos, menuWidth, menuHeight);
+  const menubg = two.makeRectangle(0, 0, menuWidth, menuHeight);
   menu.svg.add(menubg);
 
-  const xOffset = menubg.translation.x - ((menuWidth / 2) + (buttonWidth / 2) - (style.padding / 2));
-  const yOffset = menubg.translation.y - ((menuHeight / 2) + (buttonHeight / 2) - (style.padding / 2));
+  const xOffset = (- menuWidth / 2) + ((buttonWidth / 2) + (style.padding / 2));
+  const yOffset = (- menuHeight / 2) + ((buttonHeight / 2) + (style.padding / 2));
 
   for (let x = 0; x < columns; x += 1) {
     for (let y = 0; y < rows; y += 1) {
@@ -33,8 +33,8 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
           two,
           inst.symbol,
           ()=> cellConstructor(inst, coords),
-          xOffset + ((x + 1) * buttonWidth),
-          yOffset + ((y + 1) * buttonHeight),
+          xOffset + (x * buttonWidth),
+          yOffset + (y * buttonHeight),
           menuConfig
         );
         menu.svg.add(button.svg);
@@ -72,13 +72,14 @@ const menuInteraction = (menu) => {
 
 const CellCreateButton = (two, message, clickHandler, xPos, yPos, config) => {
   const rect = two.makeRectangle(
-    xPos,
-    yPos,
+    0,
+    0,
     config.buttonWidth - config.style.padding,
     config.buttonHeight - config.style.padding
   );
   rect.linewidth = config.style.linewidth;
-  const svg = two.makeGroup(rect, new Two.Text(message, xPos, yPos));
+  const svg = two.makeGroup(rect, new Two.Text(message, 0, 0));
+  svg.translation.set(xPos, yPos);
   return {
     click: clickHandler,
     svg: svg
