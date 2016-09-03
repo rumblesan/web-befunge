@@ -8,11 +8,13 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
   const {buttonColumns, buttonWidth, buttonHeight} = menuConfig;
   const rows = Math.ceil(Instructions.count / buttonColumns);
   const menuWidth = (buttonWidth * buttonColumns);
-  const menuHeight = rows * buttonHeight;
+  // Extra row is for char input
+  const menuHeight = (rows + 1) * buttonHeight;
 
   const menu = {
     svg: two.makeGroup(),
-    buttons: []
+    buttons: [],
+    charInput: undefined
   };
 
   // Menu background
@@ -39,6 +41,20 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
     }
   }
 
+  const charInput = CharInput(two, menuConfig);
+  charInput.svg.translation.set(0, (rows * buttonHeight) - yOffset);
+  //charInput.click = (c) => cellConstructor(Instructions.charInst(c), coords),
+  charInput.click = () => {
+    if (charInput.value) {
+      console.log('inst', charInput.value);
+    } else {
+      console.log('no value');
+    }
+  };
+  menu.svg.add(charInput.svg);
+  menu.charInput = charInput;
+
+
   two.update();
   menuInteraction(menu);
   return menu;
@@ -46,13 +62,24 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 };
 
 const menuInteraction = (menu) => {
+
+  menu.charInput.action = (e) => {
+    e.preventDefault();
+    menu.charInput.click();
+    closeMenu();
+  };
+  
   const closeMenu = function () {
+    window.removeEventListener('keydown', keyListen);
+    menu.charInput.svg._renderer.elem.removeEventListener('click', menu.charInput.action);
     menu.svg._renderer.elem.removeEventListener('mouseleave', closeMenu);
     _.each(menu.buttons, (b) => {
       b.svg._renderer.elem.removeEventListener('click', b.action);
     });
     menu.svg.remove();
   };
+
+  menu.charInput.svg._renderer.elem.addEventListener('click', menu.charInput.action);
 
   _.each(menu.buttons, (b) => {
     b.action = () => {
@@ -62,9 +89,31 @@ const menuInteraction = (menu) => {
     b.svg._renderer.elem.addEventListener('click', b.action);
   });
 
+  const keyListen = (e) => {
+    e.preventDefault();
+    menu.charInput.textSvg.value = e.key;
+    menu.charInput.value = e.key;
+  };
+
   menu.svg._renderer.elem.addEventListener('mouseleave', closeMenu);
+
+  window.addEventListener('keydown', keyListen);
 };
 
+const CharInput = (two, config) => {
+  const rect = two.makeRectangle(0, 0, config.buttonWidth * 2, config.buttonHeight);
+  const textSvg = new Two.Text('', 0, 0);
+  const msg = new Two.Text('char:', 0, 0);
+  textSvg.translation.set(config.buttonWidth / 2, 0);
+  msg.translation.set(-config.buttonWidth / 2, 0);
+  rect.linewidth = config.linewidth;
+
+  return {
+    textSvg: textSvg,
+    value: null,
+    svg: two.makeGroup(rect, msg, textSvg)
+  };
+};
 
 const CellCreateButtonGfx = (two, message, config) => {
   const rect = two.makeRectangle(0, 0, config.buttonWidth, config.buttonHeight);

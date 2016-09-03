@@ -1,6 +1,11 @@
 
 export default {
   count: 11,
+  charInst: (c) => {
+    return {
+      symbol: c
+    };
+  },
   0: {symbol: '^'},
   1: {symbol: '>'},
   2: {symbol: 'v'},
@@ -13,3 +18,4 @@ export default {
   9: {symbol: '*'},
   10: {symbol: '/'}
 };
+

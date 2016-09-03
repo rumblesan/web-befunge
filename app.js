@@ -8617,11 +8617,13 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
 
   var rows = Math.ceil(_instructions2.default.count / buttonColumns);
   var menuWidth = buttonWidth * buttonColumns;
-  var menuHeight = rows * buttonHeight;
+  // Extra row is for char input
+  var menuHeight = (rows + 1) * buttonHeight;
 
   var menu = {
     svg: two.makeGroup(),
-    buttons: []
+    buttons: [],
+    charInput: undefined
   };
 
   // Menu background
@@ -8651,19 +8653,43 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
     }
   }
 
+  var charInput = CharInput(two, menuConfig);
+  charInput.svg.translation.set(0, rows * buttonHeight - yOffset);
+  //charInput.click = (c) => cellConstructor(Instructions.charInst(c), coords),
+  charInput.click = function () {
+    if (charInput.value) {
+      console.log('inst', charInput.value);
+    } else {
+      console.log('no value');
+    }
+  };
+  menu.svg.add(charInput.svg);
+  menu.charInput = charInput;
+
   two.update();
   menuInteraction(menu);
   return menu;
 };
 
 var menuInteraction = function menuInteraction(menu) {
+
+  menu.charInput.action = function (e) {
+    e.preventDefault();
+    menu.charInput.click();
+    closeMenu();
+  };
+
   var closeMenu = function closeMenu() {
+    window.removeEventListener('keydown', keyListen);
+    menu.charInput.svg._renderer.elem.removeEventListener('click', menu.charInput.action);
     menu.svg._renderer.elem.removeEventListener('mouseleave', closeMenu);
     _underscore2.default.each(menu.buttons, function (b) {
       b.svg._renderer.elem.removeEventListener('click', b.action);
     });
     menu.svg.remove();
   };
+
+  menu.charInput.svg._renderer.elem.addEventListener('click', menu.charInput.action);
 
   _underscore2.default.each(menu.buttons, function (b) {
     b.action = function () {
@@ -8673,7 +8699,30 @@ var menuInteraction = function menuInteraction(menu) {
     b.svg._renderer.elem.addEventListener('click', b.action);
   });
 
+  var keyListen = function keyListen(e) {
+    e.preventDefault();
+    menu.charInput.textSvg.value = e.key;
+    menu.charInput.value = e.key;
+  };
+
   menu.svg._renderer.elem.addEventListener('mouseleave', closeMenu);
+
+  window.addEventListener('keydown', keyListen);
+};
+
+var CharInput = function CharInput(two, config) {
+  var rect = two.makeRectangle(0, 0, config.buttonWidth * 2, config.buttonHeight);
+  var textSvg = new Two.Text('', 0, 0);
+  var msg = new Two.Text('char:', 0, 0);
+  textSvg.translation.set(config.buttonWidth / 2, 0);
+  msg.translation.set(-config.buttonWidth / 2, 0);
+  rect.linewidth = config.linewidth;
+
+  return {
+    textSvg: textSvg,
+    value: null,
+    svg: two.makeGroup(rect, msg, textSvg)
+  };
 };
 
 var CellCreateButtonGfx = function CellCreateButtonGfx(two, message, config) {
@@ -8757,6 +8806,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   count: 11,
+  charInst: function charInst(c) {
+    return {
+      symbol: c
+    };
+  },
   0: { symbol: '^' },
   1: { symbol: '>' },
   2: { symbol: 'v' },
