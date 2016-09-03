@@ -10,10 +10,12 @@ export const create = (config) => {
   return grid;
 };
 
-export const getCoordinates = (grid, xPos, yPos) => {
-  var nearestX = Math.floor(xPos / grid.cellSize);
-  var nearestY = Math.floor(yPos / grid.cellSize);
+export const getCoordinates = (grid, scene, xPos, yPos) => {
+  const x = xPos - scene.translation.x;
+  const y = yPos - scene.translation.y;
+  var nearestX = Math.floor(x / grid.cellSize);
+  var nearestY = Math.floor(y / grid.cellSize);
   return {
-    x: nearestX, y: nearestY, xPos: xPos, yPos: yPos
+    x: nearestX, y: nearestY, xPos: xPos, yPos: yPos, xGrid: x, yGrid: y
   };
 };
