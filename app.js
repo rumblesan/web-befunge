@@ -1554,7 +1554,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.stop = exports.start = exports.getCell = exports.addCell = exports.create = undefined;
+exports.updatePointer = exports.stop = exports.start = exports.getCell = exports.addCell = exports.create = undefined;
 
 var _interpreter = require('./interpreter');
 
@@ -1562,12 +1562,13 @@ var Interpreter = _interopRequireWildcard(_interpreter);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-var create = exports.create = function create(interpreter, grid, gridGfx, cellGfx) {
+var create = exports.create = function create(interpreter, grid, gridGfx, cellGfx, pointerGfx) {
   return {
     interpreter: interpreter,
     grid: grid,
     gridGfx: gridGfx,
-    cellGfx: cellGfx
+    cellGfx: cellGfx,
+    pointerGfx: pointerGfx
   };
 };
 
@@ -1583,11 +1584,23 @@ var getCell = exports.getCell = function getCell(befunge, x, y) {
 var start = exports.start = function start(befunge) {
   befunge.interpreter.timer = setInterval(function () {
     Interpreter.interpret(befunge);
+    updatePointer(befunge);
   }, befunge.interpreter.speed);
 };
 
 var stop = exports.stop = function stop(befunge) {
   clearInterval(befunge.interpreter.timer);
+};
+
+var updatePointer = exports.updatePointer = function updatePointer(befunge) {
+  var interpreter = befunge.interpreter;
+  var pointerGfx = befunge.pointerGfx;
+  var grid = befunge.grid;
+  var pointer = interpreter.pointer;
+
+  var newX = (pointer.x + 0.5) * grid.cellSize;
+  var newY = (pointer.y + 0.5) * grid.cellSize;
+  pointerGfx.translation.set(newX, newY);
 };
 
 },{"./interpreter":8}],3:[function(require,module,exports){
@@ -1913,6 +1926,20 @@ var move = exports.move = function move(pointer, grid) {
 };
 
 },{}],10:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var create = exports.create = function create(two, grid, style) {
+  var pointerGfx = two.makeRectangle(0.5 * grid.cellSize, 0.5 * grid.cellSize, grid.cellSize, grid.cellSize);
+  pointerGfx.noFill();
+  pointerGfx.stroke = style.stroke;
+  pointerGfx.linewidth = style.linewidth;
+  return pointerGfx;
+};
+
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var _befunge = require('./befunge');
@@ -1935,11 +1962,13 @@ var _interpreter = require('./interpreter');
 
 var Interpreter = _interopRequireWildcard(_interpreter);
 
+var _pointerGfx = require('./pointerGfx');
+
+var PointerGFX = _interopRequireWildcard(_pointerGfx);
+
 var _creationMenu = require('./creationMenu');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-/* global Two: false */
 
 var gridConfig = {
   xCells: 50,
@@ -1950,7 +1979,8 @@ var gridConfig = {
     background: 'white',
     linewidth: 2
   }
-};
+}; /* global Two: false */
+
 var menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
@@ -1966,6 +1996,11 @@ var cellStyle = {
   linewidth: 5,
   textSize: 50
 };
+var pointerStyle = {
+  noFill: true,
+  stroke: 'blue',
+  linewidth: 5
+};
 
 (function () {
   var two = new Two({
@@ -1977,9 +2012,10 @@ var cellStyle = {
   var grid = Grid.create(gridConfig);
   var gridGfx = GridGFX.create(two, gridConfig);
   var cellGfx = two.makeGroup();
+  var pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
   var interpreter = Interpreter.create();
-  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx);
+  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
   Befunge.start(befunge);
 
   two.update();
@@ -2069,4 +2105,4 @@ var cellConstructor = function cellConstructor(two, befunge) {
   };
 };
 
-},{"./befunge":2,"./cell":3,"./creationMenu":4,"./grid":5,"./gridGfx":6,"./interpreter":8}]},{},[10]);
+},{"./befunge":2,"./cell":3,"./creationMenu":4,"./grid":5,"./gridGfx":6,"./interpreter":8,"./pointerGfx":10}]},{},[11]);

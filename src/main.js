@@ -6,6 +6,7 @@ import * as Grid    from './grid';
 import * as GridGFX from './gridGfx';
 import * as Cell    from './cell';
 import * as Interpreter from './interpreter';
+import * as PointerGFX  from './pointerGfx';
 
 import {cellCreationMenu} from './creationMenu';
 
@@ -34,6 +35,11 @@ const cellStyle = {
   linewidth: 5,
   textSize: 50
 };
+const pointerStyle = {
+  noFill: true,
+  stroke: 'blue',
+  linewidth: 5
+};
 
 (function () {
   const two = new Two({
@@ -45,9 +51,10 @@ const cellStyle = {
   const grid = Grid.create(gridConfig);
   const gridGfx = GridGFX.create(two, gridConfig);
   const cellGfx = two.makeGroup();
+  const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
   const interpreter = Interpreter.create();
-  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx);
+  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
   Befunge.start(befunge);
 
   two.update();
