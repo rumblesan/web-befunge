@@ -8497,7 +8497,7 @@ process.umask = function() { return 0; };
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updatePointer = exports.stop = exports.start = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
+exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
 
 var _interpreter = require('./interpreter');
 
@@ -8511,7 +8511,8 @@ var create = exports.create = function create(interpreter, grid, gridGfx, cellGf
     grid: grid,
     gridGfx: gridGfx,
     cellGfx: cellGfx,
-    pointerGfx: pointerGfx
+    pointerGfx: pointerGfx,
+    running: false
   };
 };
 
@@ -8544,14 +8545,20 @@ var deleteCell = exports.deleteCell = function deleteCell(befunge, cell) {
 };
 
 var start = exports.start = function start(befunge) {
-  befunge.interpreter.timer = setInterval(function () {
-    Interpreter.interpret(befunge);
-    updatePointer(befunge);
-  }, befunge.interpreter.speed);
+  if (befunge.running === false) {
+    befunge.running = true;
+    befunge.interpreter.timer = setInterval(function () {
+      Interpreter.interpret(befunge);
+      updatePointer(befunge);
+    }, befunge.interpreter.speed);
+  }
 };
 
 var stop = exports.stop = function stop(befunge) {
-  clearInterval(befunge.interpreter.timer);
+  if (befunge.running) {
+    befunge.running = false;
+    clearInterval(befunge.interpreter.timer);
+  }
 };
 
 var updatePointer = exports.updatePointer = function updatePointer(befunge) {
@@ -8560,6 +8567,19 @@ var updatePointer = exports.updatePointer = function updatePointer(befunge) {
   var grid = befunge.grid;
   var pointer = interpreter.pointer;
 
+  var newX = (pointer.x + 0.5) * grid.cellSize;
+  var newY = (pointer.y + 0.5) * grid.cellSize;
+  pointerGfx.translation.set(newX, newY);
+};
+
+var resetPointer = exports.resetPointer = function resetPointer(befunge) {
+  var interpreter = befunge.interpreter;
+  var pointerGfx = befunge.pointerGfx;
+  var grid = befunge.grid;
+  var pointer = interpreter.pointer;
+
+  pointer.x = 0;
+  pointer.y = 0;
   var newX = (pointer.x + 0.5) * grid.cellSize;
   var newY = (pointer.y + 0.5) * grid.cellSize;
   pointerGfx.translation.set(newX, newY);
@@ -9336,6 +9356,21 @@ var cellConstructor = function cellConstructor(two, befunge) {
   Befunge.start(befunge);
 
   two.update();
+
+  document.getElementById('toggle').addEventListener('click', function () {
+    if (befunge.running) {
+      Befunge.stop(befunge);
+    } else {
+      Befunge.start(befunge);
+    }
+  });
+
+  document.getElementById('restart').addEventListener('click', function () {
+    if (befunge.running) {
+      Befunge.stop(befunge);
+    }
+    Befunge.resetPointer(befunge);
+  });
 
   addGridInteractivity(two, befunge);
 })();

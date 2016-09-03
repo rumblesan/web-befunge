@@ -166,6 +166,21 @@ const cellConstructor = (two, befunge) => {
 
   two.update();
 
+  document.getElementById('toggle').addEventListener('click', () => {
+    if (befunge.running) {
+      Befunge.stop(befunge);
+    } else {
+      Befunge.start(befunge);
+    }
+  });
+
+  document.getElementById('restart').addEventListener('click', () => {
+    if (befunge.running) {
+      Befunge.stop(befunge);
+    }
+    Befunge.resetPointer(befunge);
+  });
+
   addGridInteractivity(two, befunge);
 
 })();

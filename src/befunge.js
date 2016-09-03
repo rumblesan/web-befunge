@@ -6,7 +6,8 @@ export const create = (interpreter, grid, gridGfx, cellGfx, pointerGfx) => {
     grid: grid,
     gridGfx: gridGfx,
     cellGfx: cellGfx,
-    pointerGfx: pointerGfx
+    pointerGfx: pointerGfx,
+    running: false
   };
 };
 
@@ -39,22 +40,38 @@ export const deleteCell = (befunge, cell) => {
 };
 
 export const start = (befunge) => {
-  befunge.interpreter.timer = setInterval(
-    () => {
-      Interpreter.interpret(befunge);
-      updatePointer(befunge);
-    },
-    befunge.interpreter.speed
-  );
+  if (befunge.running === false) {
+    befunge.running = true;
+    befunge.interpreter.timer = setInterval(
+      () => {
+        Interpreter.interpret(befunge);
+        updatePointer(befunge);
+      },
+      befunge.interpreter.speed
+    );
+  }
 };
 
 export const stop = (befunge) => {
-  clearInterval(befunge.interpreter.timer);
+  if (befunge.running) {
+    befunge.running = false;
+    clearInterval(befunge.interpreter.timer);
+  }
 };
 
 export const updatePointer = (befunge) => {
   const {interpreter, pointerGfx, grid} = befunge;
   const {pointer} = interpreter;
+  const newX = (pointer.x + 0.5) * grid.cellSize;
+  const newY = (pointer.y + 0.5) * grid.cellSize;
+  pointerGfx.translation.set(newX, newY);
+};
+
+export const resetPointer = (befunge) => {
+  const {interpreter, pointerGfx, grid} = befunge;
+  const {pointer} = interpreter;
+  pointer.x = 0;
+  pointer.y = 0;
   const newX = (pointer.x + 0.5) * grid.cellSize;
   const newY = (pointer.y + 0.5) * grid.cellSize;
   pointerGfx.translation.set(newX, newY);
