@@ -29,7 +29,7 @@ const evaluate = (interpreter, cell) => {
   if (cell === undefined) {
     return;
   }
-  switch (cell.instruction.symbol) {
+  switch (cell.instruction.instruction) {
   case '^':
     interpreter.pointer.direction = Pointer.Directions.up;
     break;
