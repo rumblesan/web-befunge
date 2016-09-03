@@ -41,6 +41,19 @@ const pointerStyle = {
   linewidth: 5
 };
 
+const displayMenu = (two, befunge) => {
+  return (e) => {
+    e.preventDefault();
+    const coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
+    const menu = cellCreationMenu(two, coords, cellConstructor(two, befunge), menuConfig);
+    menu.svg.translation.set(
+        (coords.x + 0.5) * befunge.grid.cellSize,
+        (coords.y + 0.5) * befunge.grid.cellSize
+    );
+    two.update();
+  };
+};
+
 (function () {
   const two = new Two({
     type: Two.Types['svg'],
@@ -55,7 +68,10 @@ const pointerStyle = {
 
   const interpreter = Interpreter.create();
   const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
-  Befunge.start(befunge);
+  //Befunge.start(befunge);
+
+
+  window.two = two;
 
   two.update();
 
@@ -65,20 +81,14 @@ const pointerStyle = {
 
 function addGridInteractivity (two, befunge) {
 
-  befunge.gridGfx._renderer.elem.addEventListener('dblclick', function (e) {
-    e.preventDefault();
-    const initial = two.scene.translation;
-    const coords = Grid.getCoordinates(befunge.grid, e.clientX - initial.x, e.clientY - initial.y);
-    cellCreationMenu(two, coords, cellConstructor(two, befunge), menuConfig);
-    two.update();
-  });
+  befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge) );
 
   befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
 
-    const initial = two.scene.translation;
-    const xOffset = e.clientX - initial.x;
-    const yOffset = e.clientY - initial.y;
+    const sceneOffset = two.scene.translation;
+    const xOffset = e.clientX - sceneOffset.x;
+    const yOffset = e.clientY - sceneOffset.y;
 
     const drag = function (e) {
       e.preventDefault();
@@ -99,20 +109,28 @@ function addGridInteractivity (two, befunge) {
 const addCellInteractivity = (two, befunge, cell) => {
 
   cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
+
     e.preventDefault();
 
-    const initial = cell.translation;
-    const xOffset = e.clientX - initial.x;
-    const yOffset = e.clientY - initial.y;
+    const xOffset = two.scene.translation.x;
+    const yOffset = two.scene.translation.y;
+
+    Befunge.startMovingCell(befunge, cell);
 
     var drag = function (e) {
       e.preventDefault();
-      cell.translation.set(e.clientX - xOffset, e.clientY - yOffset);
+      cell.gfx.translation.set(e.clientX - xOffset, e.clientY - yOffset);
     };
 
     var dragEnd = function (e) {
       e.preventDefault();
-      snapCellToGrid(befunge.grid, cell);
+
+      const coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
+      const newX = ((coords.x + 0.5) * befunge.grid.cellSize);
+      const newY = ((coords.y + 0.5) * befunge.grid.cellSize);
+
+      cell.gfx.translation.set(newX, newY);
+      //Befunge.finishMovingCell(befunge, coords.x, coords.y, cell);
       window.removeEventListener('mousemove', drag);
       window.removeEventListener('mouseup', dragEnd);
     };
@@ -122,23 +140,11 @@ const addCellInteractivity = (two, befunge, cell) => {
     window.addEventListener('mouseup', dragEnd);
   });
 
-  cell.gfx._renderer.elem.addEventListener('dblclick', function (e) {
-    e.preventDefault();
-    const initial = two.scene.translation;
-    const coords = Grid.getCoordinates(befunge.grid, e.clientX - initial.x, e.clientY - initial.y);
-    cellCreationMenu(two, coords, cellConstructor(two, befunge));
-    two.update();
-  });
-};
-
-const snapCellToGrid = (grid, cell) => {
-  var coords = Grid.getCoordinates(grid, cell.translation.x, cell.translation.y);
-  cell.translation.set((coords.x + 0.5) * grid.cellSize, (coords.y + 0.5) * grid.cellSize);
+  cell.gfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
 };
 
 const cellConstructor = (two, befunge) => {
   return (instruction, coords) => {
-
     const newCell = Cell.create(two, befunge.grid, coords.x, coords.y, instruction, cellStyle);
     Befunge.addCell(befunge, coords.x, coords.y, newCell);
     two.update();

@@ -1554,7 +1554,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updatePointer = exports.stop = exports.start = exports.getCell = exports.addCell = exports.create = undefined;
+exports.updatePointer = exports.stop = exports.start = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
 
 var _interpreter = require('./interpreter');
 
@@ -1573,12 +1573,31 @@ var create = exports.create = function create(interpreter, grid, gridGfx, cellGf
 };
 
 var addCell = exports.addCell = function addCell(befunge, x, y, cell) {
-  befunge.interpreter.cells[[x, y]] = cell.instruction;
+  befunge.interpreter.cellPositions[[x, y]] = cell;
+  befunge.interpreter.cells[cell] = [x, y];
   befunge.cellGfx.add(cell.gfx);
 };
 
 var getCell = exports.getCell = function getCell(befunge, x, y) {
-  return befunge.interpreter.cells[[x, y]];
+  return befunge.interpreter.cellPositions[[x, y]];
+};
+
+var startMovingCell = exports.startMovingCell = function startMovingCell(befunge, cell) {
+  var coords = befunge.interpreter.cells[cell];
+  befunge.interpreter.cellPositions[coords] = null;
+  return cell;
+};
+
+var finishMovingCell = exports.finishMovingCell = function finishMovingCell(befunge, x, y, cell) {
+  befunge.interpreter.cells[cell] = [x, y];
+  befunge.interpreter.cellPositions[[x, y]] = cell;
+};
+
+var deleteCell = exports.deleteCell = function deleteCell(befunge, cell) {
+  cell.gfx.remove();
+  var coords = befunge.interpreter.cells[cell];
+  delete befunge.interpreter.cellPositions[coords];
+  delete befunge.interpreter.cells[cell];
 };
 
 var start = exports.start = function start(befunge) {
@@ -1613,13 +1632,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var create = exports.create = function create(two, grid, xPos, yPos, instruction, cellStyle) {
   var gfx = two.makeGroup();
-  var text = new Two.Text(instruction.symbol, (xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize);
+  var text = new Two.Text(instruction.symbol, 0, 0);
   text.size = cellStyle.textSize;
-  var cellGfx = two.makeRectangle((xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize, grid.cellSize, grid.cellSize);
+  var cellGfx = two.makeRectangle(0, 0, grid.cellSize, grid.cellSize);
   cellGfx.fill = cellStyle.fill;
   cellGfx.stroke = cellStyle.stroke;
   cellGfx.linewidth = cellStyle.linewidth;
+
   gfx.add(cellGfx, text);
+  gfx.translation.set((xPos + 0.5) * grid.cellSize, (yPos + 0.5) * grid.cellSize);
   return {
     instruction: instruction,
     gfx: gfx
@@ -1662,11 +1683,11 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
   };
 
   // Menu background
-  var menubg = two.makeRectangle(coords.xPos, coords.yPos, menuWidth, menuHeight);
+  var menubg = two.makeRectangle(0, 0, menuWidth, menuHeight);
   menu.svg.add(menubg);
 
-  var xOffset = menubg.translation.x - (menuWidth / 2 + buttonWidth / 2 - style.padding / 2);
-  var yOffset = menubg.translation.y - (menuHeight / 2 + buttonHeight / 2 - style.padding / 2);
+  var xOffset = -menuWidth / 2 + (buttonWidth / 2 + style.padding / 2);
+  var yOffset = -menuHeight / 2 + (buttonHeight / 2 + style.padding / 2);
 
   for (var x = 0; x < columns; x += 1) {
     var _loop = function _loop(y) {
@@ -1674,7 +1695,7 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
       if (inst) {
         var button = CellCreateButton(two, inst.symbol, function () {
           return cellConstructor(inst, coords);
-        }, xOffset + (x + 1) * buttonWidth, yOffset + (y + 1) * buttonHeight, menuConfig);
+        }, xOffset + x * buttonWidth, yOffset + y * buttonHeight, menuConfig);
         menu.svg.add(button.svg);
         menu.buttons.push(button);
       }
@@ -1711,9 +1732,10 @@ var menuInteraction = function menuInteraction(menu) {
 };
 
 var CellCreateButton = function CellCreateButton(two, message, clickHandler, xPos, yPos, config) {
-  var rect = two.makeRectangle(xPos, yPos, config.buttonWidth - config.style.padding, config.buttonHeight - config.style.padding);
+  var rect = two.makeRectangle(0, 0, config.buttonWidth - config.style.padding, config.buttonHeight - config.style.padding);
   rect.linewidth = config.style.linewidth;
-  var svg = two.makeGroup(rect, new Two.Text(message, xPos, yPos));
+  var svg = two.makeGroup(rect, new Two.Text(message, 0, 0));
+  svg.translation.set(xPos, yPos);
   return {
     click: clickHandler,
     svg: svg
@@ -1737,11 +1759,13 @@ var create = exports.create = function create(config) {
   return grid;
 };
 
-var getCoordinates = exports.getCoordinates = function getCoordinates(grid, xPos, yPos) {
-  var nearestX = Math.floor(xPos / grid.cellSize);
-  var nearestY = Math.floor(yPos / grid.cellSize);
+var getCoordinates = exports.getCoordinates = function getCoordinates(grid, scene, xPos, yPos) {
+  var x = xPos - scene.translation.x;
+  var y = yPos - scene.translation.y;
+  var nearestX = Math.floor(x / grid.cellSize);
+  var nearestY = Math.floor(y / grid.cellSize);
   return {
-    x: nearestX, y: nearestY, xPos: xPos, yPos: yPos
+    x: nearestX, y: nearestY, xPos: xPos, yPos: yPos, xGrid: x, yGrid: y
   };
 };
 
@@ -1828,6 +1852,7 @@ var create = exports.create = function create() {
   var pointer = Pointer.create();
 
   var interpreter = {
+    cellPositions: {},
     cells: {},
     timer: null,
     pointer: pointer,
@@ -1852,7 +1877,7 @@ var evaluate = function evaluate(interpreter, cell) {
   if (cell === undefined) {
     return;
   }
-  switch (cell.symbol) {
+  switch (cell.instruction.symbol) {
     case '^':
       interpreter.pointer.direction = Pointer.Directions.up;
       break;
@@ -1932,7 +1957,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var create = exports.create = function create(two, grid, style) {
-  var pointerGfx = two.makeRectangle(0.5 * grid.cellSize, 0.5 * grid.cellSize, grid.cellSize, grid.cellSize);
+  var pointerGfx = two.makeRectangle(0, 0, grid.cellSize, grid.cellSize);
+  pointerGfx.translation.set(0.5 * grid.cellSize, 0.5 * grid.cellSize);
   pointerGfx.noFill();
   pointerGfx.stroke = style.stroke;
   pointerGfx.linewidth = style.linewidth;
@@ -2002,6 +2028,16 @@ var pointerStyle = {
   linewidth: 5
 };
 
+var displayMenu = function displayMenu(two, befunge) {
+  return function (e) {
+    e.preventDefault();
+    var coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
+    var menu = (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, befunge), menuConfig);
+    menu.svg.translation.set((coords.x + 0.5) * befunge.grid.cellSize, (coords.y + 0.5) * befunge.grid.cellSize);
+    two.update();
+  };
+};
+
 (function () {
   var two = new Two({
     type: Two.Types['svg'],
@@ -2016,7 +2052,10 @@ var pointerStyle = {
 
   var interpreter = Interpreter.create();
   var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
-  Befunge.start(befunge);
+  //Befunge.start(befunge);
+
+
+  window.two = two;
 
   two.update();
 
@@ -2025,20 +2064,14 @@ var pointerStyle = {
 
 function addGridInteractivity(two, befunge) {
 
-  befunge.gridGfx._renderer.elem.addEventListener('dblclick', function (e) {
-    e.preventDefault();
-    var initial = two.scene.translation;
-    var coords = Grid.getCoordinates(befunge.grid, e.clientX - initial.x, e.clientY - initial.y);
-    (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, befunge), menuConfig);
-    two.update();
-  });
+  befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
 
   befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
 
-    var initial = two.scene.translation;
-    var xOffset = e.clientX - initial.x;
-    var yOffset = e.clientY - initial.y;
+    var sceneOffset = two.scene.translation;
+    var xOffset = e.clientX - sceneOffset.x;
+    var yOffset = e.clientY - sceneOffset.y;
 
     var drag = function drag(e) {
       e.preventDefault();
@@ -2059,20 +2092,28 @@ function addGridInteractivity(two, befunge) {
 var addCellInteractivity = function addCellInteractivity(two, befunge, cell) {
 
   cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
+
     e.preventDefault();
 
-    var initial = cell.translation;
-    var xOffset = e.clientX - initial.x;
-    var yOffset = e.clientY - initial.y;
+    var xOffset = two.scene.translation.x;
+    var yOffset = two.scene.translation.y;
+
+    Befunge.startMovingCell(befunge, cell);
 
     var drag = function drag(e) {
       e.preventDefault();
-      cell.translation.set(e.clientX - xOffset, e.clientY - yOffset);
+      cell.gfx.translation.set(e.clientX - xOffset, e.clientY - yOffset);
     };
 
     var dragEnd = function dragEnd(e) {
       e.preventDefault();
-      snapCellToGrid(befunge.grid, cell);
+
+      var coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
+      var newX = (coords.x + 0.5) * befunge.grid.cellSize;
+      var newY = (coords.y + 0.5) * befunge.grid.cellSize;
+
+      cell.gfx.translation.set(newX, newY);
+      //Befunge.finishMovingCell(befunge, coords.x, coords.y, cell);
       window.removeEventListener('mousemove', drag);
       window.removeEventListener('mouseup', dragEnd);
     };
@@ -2081,23 +2122,11 @@ var addCellInteractivity = function addCellInteractivity(two, befunge, cell) {
     window.addEventListener('mouseup', dragEnd);
   });
 
-  cell.gfx._renderer.elem.addEventListener('dblclick', function (e) {
-    e.preventDefault();
-    var initial = two.scene.translation;
-    var coords = Grid.getCoordinates(befunge.grid, e.clientX - initial.x, e.clientY - initial.y);
-    (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, befunge));
-    two.update();
-  });
-};
-
-var snapCellToGrid = function snapCellToGrid(grid, cell) {
-  var coords = Grid.getCoordinates(grid, cell.translation.x, cell.translation.y);
-  cell.translation.set((coords.x + 0.5) * grid.cellSize, (coords.y + 0.5) * grid.cellSize);
+  cell.gfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
 };
 
 var cellConstructor = function cellConstructor(two, befunge) {
   return function (instruction, coords) {
-
     var newCell = Cell.create(two, befunge.grid, coords.x, coords.y, instruction, cellStyle);
     Befunge.addCell(befunge, coords.x, coords.y, newCell);
     two.update();
