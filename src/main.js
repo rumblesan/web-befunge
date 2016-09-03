@@ -9,6 +9,7 @@ import * as GridGFX from './gridGfx';
 import * as Cell    from './cell';
 import * as Interpreter from './interpreter';
 import * as PointerGFX  from './pointerGfx';
+import * as Terminal  from './terminal';
 
 import {cellCreationMenu} from './creationMenu';
 import {cellModificationMenu} from './modificationMenu';
@@ -160,8 +161,11 @@ const cellConstructor = (two, befunge) => {
   const cellGfx = two.makeGroup();
   const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
+
+  const terminal = Terminal.create(document.getElementById('terminal-text'));
+
   const interpreter = Interpreter.create();
-  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
+  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
   Befunge.start(befunge);
 
   two.update();

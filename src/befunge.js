@@ -1,13 +1,14 @@
 import * as Interpreter from './interpreter';
 
-export const create = (interpreter, grid, gridGfx, cellGfx, pointerGfx) => {
+export const create = (interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal) => {
   return {
     interpreter: interpreter,
     grid: grid,
     gridGfx: gridGfx,
     cellGfx: cellGfx,
     pointerGfx: pointerGfx,
-    running: false
+    running: false,
+    terminal: terminal
   };
 };
 

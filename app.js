@@ -8505,14 +8505,15 @@ var Interpreter = _interopRequireWildcard(_interpreter);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-var create = exports.create = function create(interpreter, grid, gridGfx, cellGfx, pointerGfx) {
+var create = exports.create = function create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal) {
   return {
     interpreter: interpreter,
     grid: grid,
     gridGfx: gridGfx,
     cellGfx: cellGfx,
     pointerGfx: pointerGfx,
-    running: false
+    running: false,
+    terminal: terminal
   };
 };
 
@@ -8875,6 +8876,10 @@ var _pointer = require('./pointer');
 
 var Pointer = _interopRequireWildcard(_pointer);
 
+var _terminal = require('./terminal');
+
+var Terminal = _interopRequireWildcard(_terminal);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 var create = exports.create = function create() {
@@ -8909,11 +8914,14 @@ var interpret = exports.interpret = function interpret(befunge) {
   var pointer = interpreter.pointer;
 
   var cell = Befunge.getCell(befunge, pointer.x, pointer.y);
-  evaluate(interpreter, cell);
+  evaluate(befunge, cell);
   Pointer.move(pointer, grid);
 };
 
-var evaluate = function evaluate(interpreter, cell) {
+var evaluate = function evaluate(befunge, cell) {
+  var interpreter = befunge.interpreter;
+  var terminal = befunge.terminal;
+
   if (cell === undefined) {
     return;
   }
@@ -9005,11 +9013,11 @@ var evaluate = function evaluate(interpreter, cell) {
       break;
     case '.':
       v1 = pop(interpreter);
-      console.log('Int', v1);
+      Terminal.print(terminal, '' + v1);
       break;
     case ',':
-      v1 = pop(interpreter);
-      console.log('Char', String.fromCharCode(v1));
+      v1 = String.fromCharCode(pop(interpreter));
+      Terminal.print(terminal, '' + v1);
       break;
     case '@':
       clearInterval(interpreter.timer);
@@ -9021,7 +9029,7 @@ var evaluate = function evaluate(interpreter, cell) {
   console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
-},{"./befunge":299,"./pointer":307}],306:[function(require,module,exports){
+},{"./befunge":299,"./pointer":307,"./terminal":309}],306:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -9177,6 +9185,30 @@ var create = exports.create = function create(two, grid, style) {
 },{}],309:[function(require,module,exports){
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var create = exports.create = function create(body) {
+
+  return {
+    lines: [{
+      chars: []
+    }],
+    body: body
+  };
+};
+
+var print = exports.print = function print(terminal, c) {
+  terminal.body.innerHTML += c;
+};
+
+var newline = exports.newline = function newline(terminal) {
+  terminal.body.innerHTML += '<br/>';
+};
+
+},{}],310:[function(require,module,exports){
+'use strict';
+
 require('babel-polyfill');
 
 var _befunge = require('./befunge');
@@ -9203,11 +9235,17 @@ var _pointerGfx = require('./pointerGfx');
 
 var PointerGFX = _interopRequireWildcard(_pointerGfx);
 
+var _terminal = require('./terminal');
+
+var Terminal = _interopRequireWildcard(_terminal);
+
 var _creationMenu = require('./creationMenu');
 
 var _modificationMenu = require('./modificationMenu');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+/* global Two: false */
 
 var gridConfig = {
   xCells: 50,
@@ -9218,8 +9256,7 @@ var gridConfig = {
     background: 'white',
     linewidth: 2
   }
-}; /* global Two: false */
-
+};
 var menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
@@ -9351,8 +9388,10 @@ var cellConstructor = function cellConstructor(two, befunge) {
   var cellGfx = two.makeGroup();
   var pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
+  var terminal = Terminal.create(document.getElementById('terminal-text'));
+
   var interpreter = Interpreter.create();
-  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
+  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
   Befunge.start(befunge);
 
   two.update();
@@ -9375,4 +9414,4 @@ var cellConstructor = function cellConstructor(two, befunge) {
   addGridInteractivity(two, befunge);
 })();
 
-},{"./befunge":299,"./cell":300,"./creationMenu":301,"./grid":302,"./gridGfx":303,"./interpreter":305,"./modificationMenu":306,"./pointerGfx":308,"babel-polyfill":1}]},{},[309]);
+},{"./befunge":299,"./cell":300,"./creationMenu":301,"./grid":302,"./gridGfx":303,"./interpreter":305,"./modificationMenu":306,"./pointerGfx":308,"./terminal":309,"babel-polyfill":1}]},{},[310]);

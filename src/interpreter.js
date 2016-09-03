@@ -1,6 +1,7 @@
 
 import * as Befunge from './befunge';
 import * as Pointer from './pointer';
+import * as Terminal from './terminal';
 
 export const create = () => {
 
@@ -32,11 +33,12 @@ export const interpret = (befunge) => {
   const {interpreter, grid} = befunge;
   const {pointer} = interpreter;
   const cell = Befunge.getCell(befunge, pointer.x, pointer.y);
-  evaluate(interpreter, cell);
+  evaluate(befunge, cell);
   Pointer.move(pointer, grid);
 };
 
-const evaluate = (interpreter, cell) => {
+const evaluate = (befunge, cell) => {
+  const {interpreter, terminal} = befunge;
   if (cell === undefined) {
     return;
   }
@@ -127,11 +129,11 @@ const evaluate = (interpreter, cell) => {
     break;
   case '.':
     v1 = pop(interpreter);
-    console.log('Int', v1);
+    Terminal.print(terminal, `${v1}`);
     break;
   case ',':
-    v1 = pop(interpreter);
-    console.log('Char', String.fromCharCode(v1));
+    v1 = String.fromCharCode(pop(interpreter));
+    Terminal.print(terminal, `${v1}`);
     break;
   case '@':
     clearInterval(interpreter.timer);
