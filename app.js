@@ -1549,6 +1549,48 @@
 }.call(this));
 
 },{}],2:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.stop = exports.start = exports.getCell = exports.addCell = exports.create = undefined;
+
+var _interpreter = require('./interpreter');
+
+var Interpreter = _interopRequireWildcard(_interpreter);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+var create = exports.create = function create(interpreter, grid, gridGfx, cellGfx) {
+  return {
+    interpreter: interpreter,
+    grid: grid,
+    gridGfx: gridGfx,
+    cellGfx: cellGfx
+  };
+};
+
+var addCell = exports.addCell = function addCell(befunge, x, y, cell) {
+  befunge.interpreter.cells[[x, y]] = cell.instruction;
+  befunge.cellGfx.add(cell.gfx);
+};
+
+var getCell = exports.getCell = function getCell(befunge, x, y) {
+  return befunge.interpreter.cells[[x, y]];
+};
+
+var start = exports.start = function start(befunge) {
+  befunge.interpreter.timer = setInterval(function () {
+    Interpreter.interpret(befunge);
+  }, befunge.interpreter.speed);
+};
+
+var stop = exports.stop = function stop(befunge) {
+  clearInterval(befunge.interpreter.timer);
+};
+
+},{"./interpreter":8}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1571,7 +1613,7 @@ var create = exports.create = function create(two, grid, xPos, yPos, instruction
   };
 };
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1665,7 +1707,7 @@ var CellCreateButton = function CellCreateButton(two, message, clickHandler, xPo
   };
 };
 
-},{"./instructions":6,"underscore":1}],4:[function(require,module,exports){
+},{"./instructions":7,"underscore":1}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1690,7 +1732,7 @@ var getCoordinates = exports.getCoordinates = function getCoordinates(grid, xPos
   };
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1729,7 +1771,7 @@ var create = exports.create = function create(two, config) {
   return gridGfx;
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1750,17 +1792,17 @@ exports.default = {
   10: { symbol: '/' }
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.stop = exports.start = exports.create = undefined;
+exports.interpret = exports.create = undefined;
 
-var _program = require('./program');
+var _befunge = require('./befunge');
 
-var Program = _interopRequireWildcard(_program);
+var Befunge = _interopRequireWildcard(_befunge);
 
 var _pointer = require('./pointer');
 
@@ -1773,6 +1815,7 @@ var create = exports.create = function create() {
   var pointer = Pointer.create();
 
   var interpreter = {
+    cells: {},
     timer: null,
     pointer: pointer,
     speed: 500
@@ -1781,24 +1824,14 @@ var create = exports.create = function create() {
   return interpreter;
 };
 
-var start = exports.start = function start(program, interpreter) {
-  interpreter.timer = setInterval(function () {
-    interpret(interpreter, program);
-  }, interpreter.speed);
-};
+var interpret = exports.interpret = function interpret(befunge) {
+  var interpreter = befunge.interpreter;
+  var grid = befunge.grid;
+  var pointer = interpreter.pointer;
 
-var stop = exports.stop = function stop(program, interpreter) {
-  clearInterval(interpreter.timer);
-};
-
-var interpret = function interpret(interpreter, program) {
-  var _interpreter$pointer = interpreter.pointer;
-  var x = _interpreter$pointer.x;
-  var y = _interpreter$pointer.y;
-
-  var cell = Program.getCell(program, x, y);
+  var cell = Befunge.getCell(befunge, pointer.x, pointer.y);
   evaluate(interpreter, cell);
-  Pointer.move(interpreter.pointer, program.grid);
+  Pointer.move(pointer, grid);
   console.log('tick', interpreter, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
@@ -1806,7 +1839,7 @@ var evaluate = function evaluate(interpreter, cell) {
   if (cell === undefined) {
     return;
   }
-  switch (cell.instruction.symbol) {
+  switch (cell.symbol) {
     case '^':
       interpreter.pointer.direction = Pointer.Directions.up;
       break;
@@ -1824,7 +1857,7 @@ var evaluate = function evaluate(interpreter, cell) {
   }
 };
 
-},{"./pointer":8,"./program":9}],8:[function(require,module,exports){
+},{"./befunge":2,"./pointer":9}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1879,36 +1912,12 @@ var move = exports.move = function move(pointer, grid) {
   }
 };
 
-},{}],9:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var create = exports.create = function create(grid, gridGfx, cellGfx) {
-  return {
-    cells: {},
-    grid: grid,
-    gridGfx: gridGfx,
-    cellGfx: cellGfx
-  };
-};
-
-var addCell = exports.addCell = function addCell(program, x, y, cell) {
-  program.cells[[x, y]] = cell;
-  program.cellGfx.add(cell.gfx);
-};
-
-var getCell = exports.getCell = function getCell(program, x, y) {
-  return program.cells[[x, y]];
-};
-
 },{}],10:[function(require,module,exports){
 'use strict';
 
-var _program = require('./program');
+var _befunge = require('./befunge');
 
-var Program = _interopRequireWildcard(_program);
+var Befunge = _interopRequireWildcard(_befunge);
 
 var _grid = require('./grid');
 
@@ -1969,27 +1978,26 @@ var cellStyle = {
   var gridGfx = GridGFX.create(two, gridConfig);
   var cellGfx = two.makeGroup();
 
-  var program = Program.create(grid, gridGfx, cellGfx);
   var interpreter = Interpreter.create();
-  Interpreter.start(program, interpreter);
+  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx);
+  Befunge.start(befunge);
 
-  window.program = program;
   two.update();
 
-  addGridInteractivity(two, program);
+  addGridInteractivity(two, befunge);
 })();
 
-function addGridInteractivity(two, program) {
+function addGridInteractivity(two, befunge) {
 
-  program.gridGfx._renderer.elem.addEventListener('dblclick', function (e) {
+  befunge.gridGfx._renderer.elem.addEventListener('dblclick', function (e) {
     e.preventDefault();
     var initial = two.scene.translation;
-    var coords = Grid.getCoordinates(program.grid, e.clientX - initial.x, e.clientY - initial.y);
-    (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, program), menuConfig);
+    var coords = Grid.getCoordinates(befunge.grid, e.clientX - initial.x, e.clientY - initial.y);
+    (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, befunge), menuConfig);
     two.update();
   });
 
-  program.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
+  befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
 
     var initial = two.scene.translation;
@@ -2012,7 +2020,7 @@ function addGridInteractivity(two, program) {
   });
 }
 
-var addCellInteractivity = function addCellInteractivity(two, program, cell) {
+var addCellInteractivity = function addCellInteractivity(two, befunge, cell) {
 
   cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
@@ -2028,7 +2036,7 @@ var addCellInteractivity = function addCellInteractivity(two, program, cell) {
 
     var dragEnd = function dragEnd(e) {
       e.preventDefault();
-      snapCellToGrid(program.grid, cell);
+      snapCellToGrid(befunge.grid, cell);
       window.removeEventListener('mousemove', drag);
       window.removeEventListener('mouseup', dragEnd);
     };
@@ -2040,8 +2048,8 @@ var addCellInteractivity = function addCellInteractivity(two, program, cell) {
   cell.gfx._renderer.elem.addEventListener('dblclick', function (e) {
     e.preventDefault();
     var initial = two.scene.translation;
-    var coords = Grid.getCoordinates(program.grid, e.clientX - initial.x, e.clientY - initial.y);
-    (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, program));
+    var coords = Grid.getCoordinates(befunge.grid, e.clientX - initial.x, e.clientY - initial.y);
+    (0, _creationMenu.cellCreationMenu)(two, coords, cellConstructor(two, befunge));
     two.update();
   });
 };
@@ -2051,14 +2059,14 @@ var snapCellToGrid = function snapCellToGrid(grid, cell) {
   cell.translation.set((coords.x + 0.5) * grid.cellSize, (coords.y + 0.5) * grid.cellSize);
 };
 
-var cellConstructor = function cellConstructor(two, program) {
+var cellConstructor = function cellConstructor(two, befunge) {
   return function (instruction, coords) {
 
-    var newCell = Cell.create(two, program.grid, coords.x, coords.y, instruction, cellStyle);
-    Program.addCell(program, coords.x, coords.y, newCell);
+    var newCell = Cell.create(two, befunge.grid, coords.x, coords.y, instruction, cellStyle);
+    Befunge.addCell(befunge, coords.x, coords.y, newCell);
     two.update();
-    addCellInteractivity(two, program, newCell);
+    addCellInteractivity(two, befunge, newCell);
   };
 };
 
-},{"./cell":2,"./creationMenu":3,"./grid":4,"./gridGfx":5,"./interpreter":7,"./program":9}]},{},[10]);
+},{"./befunge":2,"./cell":3,"./creationMenu":4,"./grid":5,"./gridGfx":6,"./interpreter":8}]},{},[10]);

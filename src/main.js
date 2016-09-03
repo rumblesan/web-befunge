@@ -1,6 +1,6 @@
 /* global Two: false */
 
-import * as Program from './program';
+import * as Befunge from './befunge';
 
 import * as Grid    from './grid';
 import * as GridGFX from './gridGfx';
@@ -46,28 +46,27 @@ const cellStyle = {
   const gridGfx = GridGFX.create(two, gridConfig);
   const cellGfx = two.makeGroup();
 
-  const program = Program.create(grid, gridGfx, cellGfx);
   const interpreter = Interpreter.create();
-  Interpreter.start(program, interpreter);
+  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx);
+  Befunge.start(befunge);
 
-  window.program = program;
   two.update();
 
-  addGridInteractivity(two, program);
+  addGridInteractivity(two, befunge);
 
 })();
 
-function addGridInteractivity (two, program) {
+function addGridInteractivity (two, befunge) {
 
-  program.gridGfx._renderer.elem.addEventListener('dblclick', function (e) {
+  befunge.gridGfx._renderer.elem.addEventListener('dblclick', function (e) {
     e.preventDefault();
     const initial = two.scene.translation;
-    const coords = Grid.getCoordinates(program.grid, e.clientX - initial.x, e.clientY - initial.y);
-    cellCreationMenu(two, coords, cellConstructor(two, program), menuConfig);
+    const coords = Grid.getCoordinates(befunge.grid, e.clientX - initial.x, e.clientY - initial.y);
+    cellCreationMenu(two, coords, cellConstructor(two, befunge), menuConfig);
     two.update();
   });
 
-  program.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
+  befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
 
     const initial = two.scene.translation;
@@ -90,7 +89,7 @@ function addGridInteractivity (two, program) {
   });
 }
 
-const addCellInteractivity = (two, program, cell) => {
+const addCellInteractivity = (two, befunge, cell) => {
 
   cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
@@ -106,7 +105,7 @@ const addCellInteractivity = (two, program, cell) => {
 
     var dragEnd = function (e) {
       e.preventDefault();
-      snapCellToGrid(program.grid, cell);
+      snapCellToGrid(befunge.grid, cell);
       window.removeEventListener('mousemove', drag);
       window.removeEventListener('mouseup', dragEnd);
     };
@@ -119,8 +118,8 @@ const addCellInteractivity = (two, program, cell) => {
   cell.gfx._renderer.elem.addEventListener('dblclick', function (e) {
     e.preventDefault();
     const initial = two.scene.translation;
-    const coords = Grid.getCoordinates(program.grid, e.clientX - initial.x, e.clientY - initial.y);
-    cellCreationMenu(two, coords, cellConstructor(two, program));
+    const coords = Grid.getCoordinates(befunge.grid, e.clientX - initial.x, e.clientY - initial.y);
+    cellCreationMenu(two, coords, cellConstructor(two, befunge));
     two.update();
   });
 };
@@ -130,12 +129,12 @@ const snapCellToGrid = (grid, cell) => {
   cell.translation.set((coords.x + 0.5) * grid.cellSize, (coords.y + 0.5) * grid.cellSize);
 };
 
-const cellConstructor = (two, program) => {
+const cellConstructor = (two, befunge) => {
   return (instruction, coords) => {
 
-    const newCell = Cell.create(two, program.grid, coords.x, coords.y, instruction, cellStyle);
-    Program.addCell(program, coords.x, coords.y, newCell);
+    const newCell = Cell.create(two, befunge.grid, coords.x, coords.y, instruction, cellStyle);
+    Befunge.addCell(befunge, coords.x, coords.y, newCell);
     two.update();
-    addCellInteractivity(two, program, newCell);
+    addCellInteractivity(two, befunge, newCell);
   };
 };
