@@ -8,13 +8,24 @@ export const create = () => {
 
   const interpreter = {
     cellPositions: {},
+    stack: [],
     cells: new Map(),
     timer: null,
     pointer: pointer,
-    speed: 500
+    speed: 500,
+    stringMode: false
   };
 
   return interpreter;
+};
+
+const push = (interpreter, value) => {
+  interpreter.stack.push(value);
+};
+
+const pop = (interpreter) => {
+  console.log(interpreter.stack);
+  return interpreter.stack.pop();
 };
 
 export const interpret = (befunge) => {
@@ -29,6 +40,15 @@ const evaluate = (interpreter, cell) => {
   if (cell === undefined) {
     return;
   }
+  if (interpreter.stringMode) {
+    if (cell.instruction.symbol === '"') {
+      interpreter.stringMode = false;
+    } else {
+      push(interpreter, cell.instruction.value);
+    }
+    return;
+  }
+  let v1, v2;
   switch (cell.instruction.instruction) {
   case '^':
     interpreter.pointer.direction = Pointer.Directions.up;
@@ -42,8 +62,83 @@ const evaluate = (interpreter, cell) => {
   case '<':
     interpreter.pointer.direction = Pointer.Directions.left;
     break;
+
+  case '_':
+    v1 = pop(interpreter);
+    if (v1 === 0) {
+      interpreter.pointer.direction = Pointer.Directions.right;
+    } else {
+      interpreter.pointer.direction = Pointer.Directions.left;
+    }
+    break;
+  case '|':
+    console.log(interpreter.stack);
+    v1 = pop(interpreter);
+    console.log('v1', v1);
+    if (v1 === 0) {
+      interpreter.pointer.direction = Pointer.Directions.down;
+    } else {
+      interpreter.pointer.direction = Pointer.Directions.up;
+    }
+    break;
+
+  case ':':
+    v1 = pop(interpreter);
+    push(interpreter, v1);
+    push(interpreter, v1);
+    break;
+  case '\\':
+    v1 = pop(interpreter);
+    v2 = pop(interpreter);
+    push(interpreter, v1);
+    push(interpreter, v2);
+    break;
+
+  case 'i':
+    console.log('i', cell.instruction.value);
+    push(interpreter, cell.instruction.value);
+    break;
+  case '"':
+    if (interpreter.stringMode) {
+      interpreter.stringMode = false;
+    } else {
+      interpreter.stringMode = true;
+    }
+    break;
+  case '+':
+    v1 = pop(interpreter);
+    v2 = pop(interpreter);
+    push(interpreter, v2 + v1);
+    break;
+  case '-':
+    v1 = pop(interpreter);
+    v2 = pop(interpreter);
+    push(interpreter, v2 - v1);
+    break;
+  case '*':
+    v1 = pop(interpreter);
+    v2 = pop(interpreter);
+    push(interpreter, v2 * v1);
+    break;
+  case '/':
+    v1 = pop(interpreter);
+    v2 = pop(interpreter);
+    push(interpreter, Math.floor(v2 / v1));
+    break;
+  case '.':
+    v1 = pop(interpreter);
+    console.log('Int', v1);
+    break;
+  case ',':
+    v1 = pop(interpreter);
+    console.log('Char', String.fromCharCode(v1));
+    break;
+  case '@':
+    clearInterval(interpreter.timer);
+    console.log('Terminated');
+    break;
   default:
-    // NOP
+    console.log('Ignoring:', cell.instruction);
   }
   console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
