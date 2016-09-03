@@ -54,33 +54,7 @@ const displayMenu = (two, befunge) => {
   };
 };
 
-(function () {
-  const two = new Two({
-    type: Two.Types['svg'],
-    fullscreen: true,
-    autostart: true
-  }).appendTo(document.getElementById('app'));
-
-  const grid = Grid.create(gridConfig);
-  const gridGfx = GridGFX.create(two, gridConfig);
-  const cellGfx = two.makeGroup();
-  const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
-
-  const interpreter = Interpreter.create();
-  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
-  //Befunge.start(befunge);
-
-
-  window.two = two;
-
-  two.update();
-
-  addGridInteractivity(two, befunge);
-
-})();
-
-function addGridInteractivity (two, befunge) {
-
+const addGridInteractivity = (two, befunge) => {
   befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge) );
 
   befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
@@ -104,9 +78,11 @@ function addGridInteractivity (two, befunge) {
     window.addEventListener('mousemove', drag);
     window.addEventListener('mouseup', dragEnd);
   });
-}
+};
 
 const addCellInteractivity = (two, befunge, cell) => {
+
+  cell.gfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
 
   cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
 
@@ -135,12 +111,9 @@ const addCellInteractivity = (two, befunge, cell) => {
       window.removeEventListener('mouseup', dragEnd);
     };
 
-
     window.addEventListener('mousemove', drag);
     window.addEventListener('mouseup', dragEnd);
   });
-
-  cell.gfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
 };
 
 const cellConstructor = (two, befunge) => {
@@ -151,3 +124,28 @@ const cellConstructor = (two, befunge) => {
     addCellInteractivity(two, befunge, newCell);
   };
 };
+
+(function () {
+  const two = new Two({
+    type: Two.Types['svg'],
+    fullscreen: true,
+    autostart: true
+  }).appendTo(document.getElementById('app'));
+
+  const grid = Grid.create(gridConfig);
+  const gridGfx = GridGFX.create(two, gridConfig);
+  const cellGfx = two.makeGroup();
+  const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
+
+  const interpreter = Interpreter.create();
+  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
+  //Befunge.start(befunge);
+
+
+  window.two = two;
+
+  two.update();
+
+  addGridInteractivity(two, befunge);
+
+})();

@@ -2038,32 +2038,7 @@ var displayMenu = function displayMenu(two, befunge) {
   };
 };
 
-(function () {
-  var two = new Two({
-    type: Two.Types['svg'],
-    fullscreen: true,
-    autostart: true
-  }).appendTo(document.getElementById('app'));
-
-  var grid = Grid.create(gridConfig);
-  var gridGfx = GridGFX.create(two, gridConfig);
-  var cellGfx = two.makeGroup();
-  var pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
-
-  var interpreter = Interpreter.create();
-  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
-  //Befunge.start(befunge);
-
-
-  window.two = two;
-
-  two.update();
-
-  addGridInteractivity(two, befunge);
-})();
-
-function addGridInteractivity(two, befunge) {
-
+var addGridInteractivity = function addGridInteractivity(two, befunge) {
   befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
 
   befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
@@ -2087,9 +2062,11 @@ function addGridInteractivity(two, befunge) {
     window.addEventListener('mousemove', drag);
     window.addEventListener('mouseup', dragEnd);
   });
-}
+};
 
 var addCellInteractivity = function addCellInteractivity(two, befunge, cell) {
+
+  cell.gfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
 
   cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
 
@@ -2121,8 +2098,6 @@ var addCellInteractivity = function addCellInteractivity(two, befunge, cell) {
     window.addEventListener('mousemove', drag);
     window.addEventListener('mouseup', dragEnd);
   });
-
-  cell.gfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
 };
 
 var cellConstructor = function cellConstructor(two, befunge) {
@@ -2133,5 +2108,29 @@ var cellConstructor = function cellConstructor(two, befunge) {
     addCellInteractivity(two, befunge, newCell);
   };
 };
+
+(function () {
+  var two = new Two({
+    type: Two.Types['svg'],
+    fullscreen: true,
+    autostart: true
+  }).appendTo(document.getElementById('app'));
+
+  var grid = Grid.create(gridConfig);
+  var gridGfx = GridGFX.create(two, gridConfig);
+  var cellGfx = two.makeGroup();
+  var pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
+
+  var interpreter = Interpreter.create();
+  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx);
+  //Befunge.start(befunge);
+
+
+  window.two = two;
+
+  two.update();
+
+  addGridInteractivity(two, befunge);
+})();
 
 },{"./befunge":2,"./cell":3,"./creationMenu":4,"./grid":5,"./gridGfx":6,"./interpreter":8,"./pointerGfx":10}]},{},[11]);
