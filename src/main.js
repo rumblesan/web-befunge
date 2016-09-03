@@ -4,6 +4,7 @@ import * as Program from './program';
 
 import * as Grid from './grid';
 import * as Cell from './cell';
+import * as Interpreter from './interpreter';
 
 import {cellCreationMenu} from './creationMenu';
 
@@ -44,6 +45,8 @@ const cellStyle = {
   const cellGfx = two.makeGroup();
 
   const program = Program.create(grid, grid.gfx, cellGfx);
+  const interpreter = Interpreter.create();
+  Interpreter.start(program, interpreter);
 
   window.program = program;
   two.update();
