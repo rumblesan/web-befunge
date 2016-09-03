@@ -5,13 +5,10 @@ import _ from 'underscore';
 
 export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
-  const style = menuConfig.style;
-  const buttonWidth = menuConfig.buttonWidth;
-  const buttonHeight = menuConfig.buttonHeight;
-  const columns = menuConfig.buttonColumns;
-  const menuWidth = (buttonWidth * columns) + style.padding;
-  const rows = Math.ceil(Instructions.count / columns);
-  const menuHeight = rows * buttonHeight + style.padding;
+  const {buttonColumns, buttonWidth, buttonHeight} = menuConfig;
+  const rows = Math.ceil(Instructions.count / buttonColumns);
+  const menuWidth = (buttonWidth * buttonColumns);
+  const menuHeight = rows * buttonHeight;
 
   const menu = {
     svg: two.makeGroup(),
@@ -19,26 +16,25 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
   };
 
   // Menu background
-  const menubg = two.makeRectangle(0, 0, menuWidth, menuHeight);
-  menu.svg.add(menubg);
+  menu.svg.add(two.makeRectangle(0, 0, menuWidth, menuHeight));
 
-  const xOffset = (- menuWidth / 2) + ((buttonWidth / 2) + (style.padding / 2));
-  const yOffset = (- menuHeight / 2) + ((buttonHeight / 2) + (style.padding / 2));
+  const xOffset = (menuWidth - buttonWidth) / 2;
+  const yOffset = (menuHeight - buttonHeight) / 2;
 
-  for (let x = 0; x < columns; x += 1) {
+  for (let x = 0; x < buttonColumns; x += 1) {
     for (let y = 0; y < rows; y += 1) {
-      let inst = Instructions[(y * columns) + x];
+      let inst = Instructions[(y * buttonColumns) + x];
       if (inst) {
-        let button = CellCreateButton(
-          two,
-          inst.symbol,
-          ()=> cellConstructor(inst, coords),
-          xOffset + (x * buttonWidth),
-          yOffset + (y * buttonHeight),
-          menuConfig
+        let buttonGfx = CellCreateButtonGfx(two, inst.symbol, menuConfig);
+        buttonGfx.translation.set(
+          (x * buttonWidth) - xOffset,
+          (y * buttonHeight) - yOffset
         );
-        menu.svg.add(button.svg);
-        menu.buttons.push(button);
+        menu.svg.add(buttonGfx);
+        menu.buttons.push({
+          svg: buttonGfx,
+          click: ()=> cellConstructor(inst, coords)
+        });
       }
     }
   }
@@ -70,18 +66,9 @@ const menuInteraction = (menu) => {
 };
 
 
-const CellCreateButton = (two, message, clickHandler, xPos, yPos, config) => {
-  const rect = two.makeRectangle(
-    0,
-    0,
-    config.buttonWidth - config.style.padding,
-    config.buttonHeight - config.style.padding
-  );
-  rect.linewidth = config.style.linewidth;
+const CellCreateButtonGfx = (two, message, config) => {
+  const rect = two.makeRectangle(0, 0, config.buttonWidth, config.buttonHeight);
+  rect.linewidth = config.linewidth;
   const svg = two.makeGroup(rect, new Two.Text(message, 0, 0));
-  svg.translation.set(xPos, yPos);
-  return {
-    click: clickHandler,
-    svg: svg
-  };
+  return svg;
 };

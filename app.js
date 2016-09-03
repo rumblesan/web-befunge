@@ -8611,14 +8611,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /* global Two: false */
 
 var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two, coords, cellConstructor, menuConfig) {
-
-  var style = menuConfig.style;
+  var buttonColumns = menuConfig.buttonColumns;
   var buttonWidth = menuConfig.buttonWidth;
   var buttonHeight = menuConfig.buttonHeight;
-  var columns = menuConfig.buttonColumns;
-  var menuWidth = buttonWidth * columns + style.padding;
-  var rows = Math.ceil(_instructions2.default.count / columns);
-  var menuHeight = rows * buttonHeight + style.padding;
+
+  var rows = Math.ceil(_instructions2.default.count / buttonColumns);
+  var menuWidth = buttonWidth * buttonColumns;
+  var menuHeight = rows * buttonHeight;
 
   var menu = {
     svg: two.makeGroup(),
@@ -8626,21 +8625,24 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
   };
 
   // Menu background
-  var menubg = two.makeRectangle(0, 0, menuWidth, menuHeight);
-  menu.svg.add(menubg);
+  menu.svg.add(two.makeRectangle(0, 0, menuWidth, menuHeight));
 
-  var xOffset = -menuWidth / 2 + (buttonWidth / 2 + style.padding / 2);
-  var yOffset = -menuHeight / 2 + (buttonHeight / 2 + style.padding / 2);
+  var xOffset = (menuWidth - buttonWidth) / 2;
+  var yOffset = (menuHeight - buttonHeight) / 2;
 
-  for (var x = 0; x < columns; x += 1) {
+  for (var x = 0; x < buttonColumns; x += 1) {
     var _loop = function _loop(y) {
-      var inst = _instructions2.default[y * columns + x];
+      var inst = _instructions2.default[y * buttonColumns + x];
       if (inst) {
-        var button = CellCreateButton(two, inst.symbol, function () {
-          return cellConstructor(inst, coords);
-        }, xOffset + x * buttonWidth, yOffset + y * buttonHeight, menuConfig);
-        menu.svg.add(button.svg);
-        menu.buttons.push(button);
+        var buttonGfx = CellCreateButtonGfx(two, inst.symbol, menuConfig);
+        buttonGfx.translation.set(x * buttonWidth - xOffset, y * buttonHeight - yOffset);
+        menu.svg.add(buttonGfx);
+        menu.buttons.push({
+          svg: buttonGfx,
+          click: function click() {
+            return cellConstructor(inst, coords);
+          }
+        });
       }
     };
 
@@ -8674,15 +8676,11 @@ var menuInteraction = function menuInteraction(menu) {
   menu.svg._renderer.elem.addEventListener('mouseleave', closeMenu);
 };
 
-var CellCreateButton = function CellCreateButton(two, message, clickHandler, xPos, yPos, config) {
-  var rect = two.makeRectangle(0, 0, config.buttonWidth - config.style.padding, config.buttonHeight - config.style.padding);
-  rect.linewidth = config.style.linewidth;
+var CellCreateButtonGfx = function CellCreateButtonGfx(two, message, config) {
+  var rect = two.makeRectangle(0, 0, config.buttonWidth, config.buttonHeight);
+  rect.linewidth = config.linewidth;
   var svg = two.makeGroup(rect, new Two.Text(message, 0, 0));
-  svg.translation.set(xPos, yPos);
-  return {
-    click: clickHandler,
-    svg: svg
-  };
+  return svg;
 };
 
 },{"./instructions":304,"underscore":298}],302:[function(require,module,exports){
@@ -8957,10 +8955,7 @@ var menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
   buttonColumns: 5,
-  style: {
-    padding: 4,
-    linewidth: 2
-  }
+  linewidth: 2
 };
 var cellStyle = {
   fill: '#FF8000',

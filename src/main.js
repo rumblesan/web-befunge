@@ -26,10 +26,7 @@ const menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
   buttonColumns: 5,
-  style: {
-    padding: 4,
-    linewidth: 2
-  }
+  linewidth: 2
 };
 const cellStyle = {
   fill: '#FF8000',
