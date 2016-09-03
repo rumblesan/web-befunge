@@ -140,6 +140,7 @@ const addCellInteractivity = (two, befunge, cell) => {
 
 const cellConstructor = (two, befunge) => {
   return (instruction, coords) => {
+    console.log('new instruction', instruction);
     const newCell = Cell.create(two, befunge.grid, coords.x, coords.y, instruction, cellStyle);
     Befunge.addCell(befunge, coords.x, coords.y, newCell);
     two.update();

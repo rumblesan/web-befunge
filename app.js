@@ -8610,6 +8610,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /* global Two: false */
 
+var isValid = /[0-9a-zA-Z]/;
+var isInt = /[0-9]/;
+var isChar = /[a-zA-Z]/;
+
 var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two, coords, cellConstructor, menuConfig) {
   var buttonColumns = menuConfig.buttonColumns;
   var buttonWidth = menuConfig.buttonWidth;
@@ -8655,12 +8659,11 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
 
   var charInput = CharInput(two, menuConfig);
   charInput.svg.translation.set(0, rows * buttonHeight - yOffset);
-  //charInput.click = (c) => cellConstructor(Instructions.charInst(c), coords),
-  charInput.click = function () {
-    if (charInput.value) {
-      console.log('inst', charInput.value);
-    } else {
-      console.log('no value');
+  charInput.click = function (c) {
+    if (isChar.test(c)) {
+      cellConstructor(_instructions2.default.charInst(c), coords);
+    } else if (isInt.test(c)) {
+      cellConstructor(_instructions2.default.intInst(c), coords);
     }
   };
   menu.svg.add(charInput.svg);
@@ -8675,7 +8678,7 @@ var menuInteraction = function menuInteraction(menu) {
 
   menu.charInput.action = function (e) {
     e.preventDefault();
-    menu.charInput.click();
+    menu.charInput.click(menu.charInput.value);
     closeMenu();
   };
 
@@ -8701,8 +8704,10 @@ var menuInteraction = function menuInteraction(menu) {
 
   var keyListen = function keyListen(e) {
     e.preventDefault();
-    menu.charInput.textSvg.value = e.key;
-    menu.charInput.value = e.key;
+    if (isValid.test(e.key)) {
+      menu.charInput.textSvg.value = e.key;
+      menu.charInput.value = e.key;
+    }
   };
 
   menu.svg._renderer.elem.addEventListener('mouseleave', closeMenu);
@@ -8808,20 +8813,29 @@ exports.default = {
   count: 11,
   charInst: function charInst(c) {
     return {
-      symbol: c
+      symbol: c,
+      instruction: 'c',
+      value: c
     };
   },
-  0: { symbol: '^' },
-  1: { symbol: '>' },
-  2: { symbol: 'v' },
-  3: { symbol: '<' },
-  4: { symbol: '_' },
-  5: { symbol: '|' },
-  6: { symbol: '@' },
-  7: { symbol: '+' },
-  8: { symbol: '-' },
-  9: { symbol: '*' },
-  10: { symbol: '/' }
+  intInst: function intInst(i) {
+    return {
+      symbol: i,
+      instruction: 'i',
+      value: parseInt(i, 10)
+    };
+  },
+  0: { symbol: '^', instruction: '^' },
+  1: { symbol: '>', instruction: '>' },
+  2: { symbol: 'v', instruction: 'v' },
+  3: { symbol: '<', instruction: '<' },
+  4: { symbol: '_', instruction: '_' },
+  5: { symbol: '|', instruction: '|' },
+  6: { symbol: '@', instruction: '@' },
+  7: { symbol: '+', instruction: '+' },
+  8: { symbol: '-', instruction: '-' },
+  9: { symbol: '*', instruction: '*' },
+  10: { symbol: '/', instruction: '/' }
 };
 
 },{}],305:[function(require,module,exports){
@@ -9200,6 +9214,7 @@ var addCellInteractivity = function addCellInteractivity(two, befunge, cell) {
 
 var cellConstructor = function cellConstructor(two, befunge) {
   return function (instruction, coords) {
+    console.log('new instruction', instruction);
     var newCell = Cell.create(two, befunge.grid, coords.x, coords.y, instruction, cellStyle);
     Befunge.addCell(befunge, coords.x, coords.y, newCell);
     two.update();

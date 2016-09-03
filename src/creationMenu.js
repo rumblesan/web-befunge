@@ -3,6 +3,10 @@
 import Instructions from './instructions';
 import _ from 'underscore';
 
+const isValid = /[0-9a-zA-Z]/;
+const isInt = /[0-9]/;
+const isChar = /[a-zA-Z]/;
+
 export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
   const {buttonColumns, buttonWidth, buttonHeight} = menuConfig;
@@ -43,17 +47,15 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
   const charInput = CharInput(two, menuConfig);
   charInput.svg.translation.set(0, (rows * buttonHeight) - yOffset);
-  //charInput.click = (c) => cellConstructor(Instructions.charInst(c), coords),
-  charInput.click = () => {
-    if (charInput.value) {
-      console.log('inst', charInput.value);
-    } else {
-      console.log('no value');
+  charInput.click = (c) => {
+    if (isChar.test(c)) {
+      cellConstructor(Instructions.charInst(c), coords);
+    } else if (isInt.test(c)) {
+      cellConstructor(Instructions.intInst(c), coords);
     }
   };
   menu.svg.add(charInput.svg);
   menu.charInput = charInput;
-
 
   two.update();
   menuInteraction(menu);
@@ -65,7 +67,7 @@ const menuInteraction = (menu) => {
 
   menu.charInput.action = (e) => {
     e.preventDefault();
-    menu.charInput.click();
+    menu.charInput.click(menu.charInput.value);
     closeMenu();
   };
   
@@ -91,8 +93,10 @@ const menuInteraction = (menu) => {
 
   const keyListen = (e) => {
     e.preventDefault();
-    menu.charInput.textSvg.value = e.key;
-    menu.charInput.value = e.key;
+    if (isValid.test(e.key)) {
+      menu.charInput.textSvg.value = e.key;
+      menu.charInput.value = e.key;
+    }
   };
 
   menu.svg._renderer.elem.addEventListener('mouseleave', closeMenu);
