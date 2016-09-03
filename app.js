@@ -8836,7 +8836,90 @@ var evaluate = function evaluate(interpreter, cell) {
   console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
-},{"./befunge":299,"./pointer":306}],306:[function(require,module,exports){
+},{"./befunge":299,"./pointer":307}],306:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.cellModificationMenu = undefined;
+
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var cellModificationMenu = exports.cellModificationMenu = function cellModificationMenu(two, coords, config, editMenuConstructor, buttonDestructor) {
+  var buttonWidth = config.buttonWidth;
+  var buttonHeight = config.buttonHeight;
+
+  var menuWidth = buttonWidth;
+  var menuHeight = 2 * buttonHeight;
+
+  var menu = {
+    svg: two.makeGroup(),
+    buttons: []
+  };
+
+  // Menu background
+  menu.svg.add(two.makeRectangle(0, 0, menuWidth, menuHeight));
+
+  var yOffset = buttonHeight / 2;
+
+  var editButtonGfx = CellEditButtonGfx(two, 'Edit', config);
+  editButtonGfx.translation.set(0, -yOffset);
+  menu.svg.add(editButtonGfx);
+  menu.buttons.push({
+    svg: editButtonGfx,
+    click: function click() {
+      return editMenuConstructor(coords);
+    }
+  });
+
+  var deleteButtonGfx = CellEditButtonGfx(two, 'Delete', config);
+  deleteButtonGfx.translation.set(0, yOffset);
+  menu.svg.add(deleteButtonGfx);
+  menu.buttons.push({
+    svg: deleteButtonGfx,
+    click: function click() {
+      return buttonDestructor(coords);
+    }
+  });
+
+  two.update();
+  menuInteraction(menu);
+  return menu;
+}; /* global Two: false */
+
+var menuInteraction = function menuInteraction(menu) {
+  var closeMenu = function closeMenu() {
+    menu.svg._renderer.elem.removeEventListener('mouseleave', closeMenu);
+    _underscore2.default.each(menu.buttons, function (b) {
+      b.svg._renderer.elem.removeEventListener('click', b.action);
+    });
+    menu.svg.remove();
+  };
+
+  _underscore2.default.each(menu.buttons, function (b) {
+    b.action = function () {
+      b.click();
+      closeMenu();
+    };
+    b.svg._renderer.elem.addEventListener('click', b.action);
+  });
+
+  menu.svg._renderer.elem.addEventListener('mouseleave', closeMenu);
+};
+
+var CellEditButtonGfx = function CellEditButtonGfx(two, message, config) {
+  var rect = two.makeRectangle(0, 0, config.buttonWidth, config.buttonHeight);
+  rect.linewidth = config.linewidth;
+  var svg = two.makeGroup(rect, new Two.Text(message, 0, 0));
+  return svg;
+};
+
+},{"underscore":298}],307:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8891,7 +8974,7 @@ var move = exports.move = function move(pointer, grid) {
   }
 };
 
-},{}],307:[function(require,module,exports){
+},{}],308:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8906,7 +8989,7 @@ var create = exports.create = function create(two, grid, style) {
   return pointerGfx;
 };
 
-},{}],308:[function(require,module,exports){
+},{}],309:[function(require,module,exports){
 'use strict';
 
 require('babel-polyfill');
@@ -8937,9 +9020,9 @@ var PointerGFX = _interopRequireWildcard(_pointerGfx);
 
 var _creationMenu = require('./creationMenu');
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _modificationMenu = require('./modificationMenu');
 
-/* global Two: false */
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 var gridConfig = {
   xCells: 50,
@@ -8950,12 +9033,18 @@ var gridConfig = {
     background: 'white',
     linewidth: 2
   }
-};
+}; /* global Two: false */
+
 var menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
   buttonColumns: 5,
   linewidth: 2
+};
+var editMenuConfig = {
+  buttonWidth: 100,
+  buttonHeight: 50,
+  lineWidth: 2
 };
 var cellStyle = {
   fill: '#FF8000',
@@ -8969,7 +9058,21 @@ var pointerStyle = {
   linewidth: 5
 };
 
-var displayMenu = function displayMenu(two, befunge) {
+var displayCellEditMenu = function displayCellEditMenu(two, befunge, cell) {
+  return function (e) {
+    e.preventDefault();
+    var coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
+    var menu = (0, _modificationMenu.cellModificationMenu)(two, coords, editMenuConfig, function () {
+      console.log('edit');
+    }, function () {
+      Befunge.deleteCell(befunge, cell);
+    });
+    menu.svg.translation.set((coords.x + 0.5) * befunge.grid.cellSize, (coords.y + 0.5) * befunge.grid.cellSize);
+    two.update();
+  };
+};
+
+var displayCellCreationMenu = function displayCellCreationMenu(two, befunge) {
   return function (e) {
     e.preventDefault();
     var coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
@@ -8980,7 +9083,7 @@ var displayMenu = function displayMenu(two, befunge) {
 };
 
 var addGridInteractivity = function addGridInteractivity(two, befunge) {
-  befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
+  befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayCellCreationMenu(two, befunge));
 
   befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
@@ -9007,7 +9110,7 @@ var addGridInteractivity = function addGridInteractivity(two, befunge) {
 
 var addCellInteractivity = function addCellInteractivity(two, befunge, cell) {
 
-  cell.gfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
+  cell.gfx._renderer.elem.addEventListener('dblclick', displayCellEditMenu(two, befunge, cell));
 
   cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
 
@@ -9071,4 +9174,4 @@ var cellConstructor = function cellConstructor(two, befunge) {
   addGridInteractivity(two, befunge);
 })();
 
-},{"./befunge":299,"./cell":300,"./creationMenu":301,"./grid":302,"./gridGfx":303,"./interpreter":305,"./pointerGfx":307,"babel-polyfill":1}]},{},[308]);
+},{"./befunge":299,"./cell":300,"./creationMenu":301,"./grid":302,"./gridGfx":303,"./interpreter":305,"./modificationMenu":306,"./pointerGfx":308,"babel-polyfill":1}]},{},[309]);

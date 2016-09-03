@@ -1,6 +1,6 @@
 /* global Two: false */
 
-import "babel-polyfill";
+import 'babel-polyfill';
 
 import * as Befunge from './befunge';
 
@@ -11,6 +11,7 @@ import * as Interpreter from './interpreter';
 import * as PointerGFX  from './pointerGfx';
 
 import {cellCreationMenu} from './creationMenu';
+import {cellModificationMenu} from './modificationMenu';
 
 const gridConfig = {
   xCells: 50,
@@ -28,6 +29,11 @@ const menuConfig = {
   buttonColumns: 5,
   linewidth: 2
 };
+const editMenuConfig = {
+  buttonWidth: 100,
+  buttonHeight: 50,
+  lineWidth: 2
+};
 const cellStyle = {
   fill: '#FF8000',
   stroke: 'orangered',
@@ -40,11 +46,28 @@ const pointerStyle = {
   linewidth: 5
 };
 
-const displayMenu = (two, befunge) => {
+const displayCellEditMenu = (two, befunge, cell) => {
   return (e) => {
     e.preventDefault();
     const coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
-    const menu = cellCreationMenu(two, coords, cellConstructor(two, befunge), menuConfig);
+    let menu = cellModificationMenu(
+      two, coords, editMenuConfig,
+      () => {console.log('edit');},
+      () => {Befunge.deleteCell(befunge, cell);}
+    );
+    menu.svg.translation.set(
+        (coords.x + 0.5) * befunge.grid.cellSize,
+        (coords.y + 0.5) * befunge.grid.cellSize
+    );
+    two.update();
+  };
+};
+
+const displayCellCreationMenu = (two, befunge) => {
+  return (e) => {
+    e.preventDefault();
+    const coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
+    let menu = cellCreationMenu(two, coords, cellConstructor(two, befunge), menuConfig);
     menu.svg.translation.set(
         (coords.x + 0.5) * befunge.grid.cellSize,
         (coords.y + 0.5) * befunge.grid.cellSize
@@ -54,7 +77,7 @@ const displayMenu = (two, befunge) => {
 };
 
 const addGridInteractivity = (two, befunge) => {
-  befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge) );
+  befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayCellCreationMenu(two, befunge) );
 
   befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
@@ -81,7 +104,7 @@ const addGridInteractivity = (two, befunge) => {
 
 const addCellInteractivity = (two, befunge, cell) => {
 
-  cell.gfx._renderer.elem.addEventListener('dblclick', displayMenu(two, befunge));
+  cell.gfx._renderer.elem.addEventListener('dblclick', displayCellEditMenu(two, befunge, cell));
 
   cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
 
