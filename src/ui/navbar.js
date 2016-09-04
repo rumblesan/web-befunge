@@ -2,10 +2,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export const NavBar = React.createClass({
+import ProgramText from './programText';
+
+export default React.createClass({
   getInitialState: function () {
     return {
-      running: this.props.running
+      running: this.props.running,
+      showtext: false
     };
   },
 
@@ -21,22 +24,30 @@ export const NavBar = React.createClass({
     }, this.props.reset);
   },
 
+  programtext: function () {
+    this.setState({showtext: !this.state.showtext});
+  },
+
+  updatetext: function (text) {
+    this.setState(
+      {showtext: !this.state.showtext},
+      () => {
+        this.props.updateprogram(text);
+      }
+    );
+  },
+
   render: function () {
     return (
       <div>
-        <span className='control-item'>Befunge</span>
-        <span onClick={this.toggleRunning} className='control-item'>{this.state.running ? 'Stop' : 'Start'}</span>
-        <span onClick={this.reset} className='control-item'>Restart</span>
+        <div>
+            <span className='control-item'>Befunge</span>
+            <span onClick={this.toggleRunning} className='control-item'>{this.state.running ? 'Stop' : 'Start'}</span>
+            <span onClick={this.reset} className='control-item'>Restart</span>
+            <span onClick={this.programtext} className='control-item'>Program Text</span>
+        </div>
+        {this.state.showtext ? <ProgramText text='foo' close={this.programtext} update={this.updatetext} /> : <div></div>}
       </div>
     );
   }
 });
-
-export const create = (el, startStopCb, resetCb, running) => {
-  return {
-    component: ReactDOM.render(
-      <NavBar startStop={startStopCb} reset={resetCb} running={running} />,
-      el
-    )
-  };
-};

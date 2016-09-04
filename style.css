@@ -95,3 +95,11 @@ canvas {
 #terminal-body msg { color: lime!important; }
 #terminal-body err { color: red!important; }
 
+.program-text {
+    position: absolute;
+    left: 100px;
+    top: 100px;
+    padding: 10px;
+    z-index: 100;
+    background-color: #000000;
+}

@@ -10,7 +10,10 @@ import * as Cell    from './befunge/cell';
 import * as Interpreter from './befunge/interpreter';
 import * as PointerGFX  from './befunge/pointerGfx';
 import * as Terminal  from './ui/terminal';
-import * as NavBar  from './ui/navbar';
+import NavBar  from './ui/navbar';
+
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import {cellCreationMenu} from './befunge/creationMenu';
 import {cellModificationMenu} from './befunge/modificationMenu';
@@ -163,22 +166,20 @@ const cellConstructor = (two, befunge) => {
   const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
 
-  NavBar.create(
+  ReactDOM.render(
+    <NavBar
+      startStop={() => { befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);}}
+      reset={
+        () => {
+          if (befunge.running) {
+            Befunge.stop(befunge);
+          }
+          Befunge.resetPointer(befunge);
+        }
+      }
+      updateprogram={(text) => console.log('update', text)}
+      running={true} />,
     document.getElementById('header'),
-    () => {
-      if (befunge.running) {
-        Befunge.stop(befunge);
-      } else {
-        Befunge.start(befunge);
-      }
-    },
-    () => {
-      if (befunge.running) {
-        Befunge.stop(befunge);
-      }
-      Befunge.resetPointer(befunge);
-    },
-    true
   );
 
   const terminal = Terminal.create(

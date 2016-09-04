@@ -29608,7 +29608,7 @@ var evaluate = function evaluate(befunge, cell) {
   console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
-},{"../befunge":473,"../ui/terminal":480,"./pointer":477}],476:[function(require,module,exports){
+},{"../befunge":473,"../ui/terminal":481,"./pointer":477}],476:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29767,7 +29767,6 @@ var create = exports.create = function create(two, grid, style) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.create = exports.NavBar = undefined;
 
 var _react = require('react');
 
@@ -29777,14 +29776,19 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+var _programText = require('./programText');
+
+var _programText2 = _interopRequireDefault(_programText);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var NavBar = exports.NavBar = _react2.default.createClass({
-  displayName: 'NavBar',
+exports.default = _react2.default.createClass({
+  displayName: 'navbar',
 
   getInitialState: function getInitialState() {
     return {
-      running: this.props.running
+      running: this.props.running,
+      showtext: false
     };
   },
 
@@ -29800,36 +29804,91 @@ var NavBar = exports.NavBar = _react2.default.createClass({
     }, this.props.reset);
   },
 
+  programtext: function programtext() {
+    this.setState({ showtext: !this.state.showtext });
+  },
+
+  updatetext: function updatetext(text) {
+    var _this = this;
+
+    this.setState({ showtext: !this.state.showtext }, function () {
+      _this.props.updateprogram(text);
+    });
+  },
+
   render: function render() {
     return _react2.default.createElement(
       'div',
       null,
       _react2.default.createElement(
-        'span',
-        { className: 'control-item' },
-        'Befunge'
+        'div',
+        null,
+        _react2.default.createElement(
+          'span',
+          { className: 'control-item' },
+          'Befunge'
+        ),
+        _react2.default.createElement(
+          'span',
+          { onClick: this.toggleRunning, className: 'control-item' },
+          this.state.running ? 'Stop' : 'Start'
+        ),
+        _react2.default.createElement(
+          'span',
+          { onClick: this.reset, className: 'control-item' },
+          'Restart'
+        ),
+        _react2.default.createElement(
+          'span',
+          { onClick: this.programtext, className: 'control-item' },
+          'Program Text'
+        )
+      ),
+      this.state.showtext ? _react2.default.createElement(_programText2.default, { text: 'foo', close: this.programtext, update: this.updatetext }) : _react2.default.createElement('div', null)
+    );
+  }
+});
+
+},{"./programText":480,"react":467,"react-dom":298}],480:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = _react2.default.createClass({
+  displayName: 'programText',
+
+  render: function render() {
+    var _this = this;
+
+    return _react2.default.createElement(
+      'div',
+      { className: 'program-text' },
+      _react2.default.createElement('textarea', { rows: '25', cols: '80', ref: 'programtext', defaultValue: this.props.text }),
+      _react2.default.createElement(
+        'button',
+        { onClick: function onClick() {
+            return _this.props.update(_this.refs.programtext.value);
+          } },
+        'Update'
       ),
       _react2.default.createElement(
-        'span',
-        { onClick: this.toggleRunning, className: 'control-item' },
-        this.state.running ? 'Stop' : 'Start'
-      ),
-      _react2.default.createElement(
-        'span',
-        { onClick: this.reset, className: 'control-item' },
-        'Restart'
+        'button',
+        { onClick: this.props.close },
+        'Close'
       )
     );
   }
 });
 
-var create = exports.create = function create(el, startStopCb, resetCb, running) {
-  return {
-    component: _reactDom2.default.render(_react2.default.createElement(NavBar, { startStop: startStopCb, reset: resetCb, running: running }), el)
-  };
-};
-
-},{"react":467,"react-dom":298}],480:[function(require,module,exports){
+},{"react":467}],481:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29928,7 +29987,7 @@ var newline = exports.newline = function newline(terminal) {
   terminal.component.setState({ lines: lines, active: '' });
 };
 
-},{"react":467,"react-dom":298,"underscore":468}],481:[function(require,module,exports){
+},{"react":467,"react-dom":298,"underscore":468}],482:[function(require,module,exports){
 'use strict';
 
 require('babel-polyfill');
@@ -29963,11 +30022,21 @@ var Terminal = _interopRequireWildcard(_terminal);
 
 var _navbar = require('./ui/navbar');
 
-var NavBar = _interopRequireWildcard(_navbar);
+var _navbar2 = _interopRequireDefault(_navbar);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _creationMenu = require('./befunge/creationMenu');
 
 var _modificationMenu = require('./befunge/modificationMenu');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -30113,18 +30182,20 @@ var cellConstructor = function cellConstructor(two, befunge) {
   var cellGfx = two.makeGroup();
   var pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
-  NavBar.create(document.getElementById('header'), function () {
-    if (befunge.running) {
-      Befunge.stop(befunge);
-    } else {
-      Befunge.start(befunge);
-    }
-  }, function () {
-    if (befunge.running) {
-      Befunge.stop(befunge);
-    }
-    Befunge.resetPointer(befunge);
-  }, true);
+  _reactDom2.default.render(_react2.default.createElement(_navbar2.default, {
+    startStop: function startStop() {
+      befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);
+    },
+    reset: function reset() {
+      if (befunge.running) {
+        Befunge.stop(befunge);
+      }
+      Befunge.resetPointer(befunge);
+    },
+    updateprogram: function updateprogram(text) {
+      return console.log('update', text);
+    },
+    running: true }), document.getElementById('header'));
 
   var terminal = Terminal.create(document.getElementById('console'));
 
@@ -30137,4 +30208,4 @@ var cellConstructor = function cellConstructor(two, befunge) {
   addGridInteractivity(two, befunge);
 })();
 
-},{"./befunge":473,"./befunge/cell":469,"./befunge/creationMenu":470,"./befunge/grid":471,"./befunge/gridGfx":472,"./befunge/interpreter":475,"./befunge/modificationMenu":476,"./befunge/pointerGfx":478,"./ui/navbar":479,"./ui/terminal":480,"babel-polyfill":1}]},{},[481]);
+},{"./befunge":473,"./befunge/cell":469,"./befunge/creationMenu":470,"./befunge/grid":471,"./befunge/gridGfx":472,"./befunge/interpreter":475,"./befunge/modificationMenu":476,"./befunge/pointerGfx":478,"./ui/navbar":479,"./ui/terminal":481,"babel-polyfill":1,"react":467,"react-dom":298}]},{},[482]);
