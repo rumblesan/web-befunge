@@ -2,10 +2,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import _ from 'underscore';
+
 export const ReactTerminal = React.createClass({
   getInitialState: function () {
     return {
-      text: ''
+      lines: [],
+      activeLine: ''
     };
   },
 
@@ -22,9 +25,12 @@ export const ReactTerminal = React.createClass({
         </div>
 
         <div id="terminal-body">
-          <p>
-            <msg>{'>> '}</msg>{this.state.text}<br />
-          </p>
+          {
+            _.map(this.state.lines, (line) => {
+              return <p><msg>{'>> '}</msg>{line}<br /></p>;
+            })
+          }
+          {<p><msg>{'>> '}</msg>{this.state.activeLine}<br /></p>}
         </div>
 
       </div>
@@ -40,15 +46,19 @@ export const create = (element) => {
 
 export const render = (element) => {
   return ReactDOM.render(
-    <ReactTerminal text={''} />,
+    <ReactTerminal />,
     element
   );
 };
 
 export const print = (terminal, c) => {
-  terminal.component.setState({text: terminal.component.state.text + c});
+  const active = terminal.component.state.activeLine;
+  terminal.component.setState({activeLine: active + c});
 };
 
 export const newline = (terminal) => {
-  terminal.component.setState({text: terminal.component.state.text + '<br />'});
+  const lines = terminal.component.state.lines;
+  const active = terminal.component.state.activeLine;
+  lines.push(active);
+  terminal.component.setState({lines: lines, active: ''});
 };

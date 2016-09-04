@@ -29777,6 +29777,10 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var ReactTerminal = exports.ReactTerminal = _react2.default.createClass({
@@ -29784,7 +29788,8 @@ var ReactTerminal = exports.ReactTerminal = _react2.default.createClass({
 
   getInitialState: function getInitialState() {
     return {
-      text: ''
+      lines: [],
+      activeLine: ''
     };
   },
 
@@ -29804,6 +29809,19 @@ var ReactTerminal = exports.ReactTerminal = _react2.default.createClass({
       _react2.default.createElement(
         'div',
         { id: 'terminal-body' },
+        _underscore2.default.map(this.state.lines, function (line) {
+          return _react2.default.createElement(
+            'p',
+            null,
+            _react2.default.createElement(
+              'msg',
+              null,
+              '>> '
+            ),
+            line,
+            _react2.default.createElement('br', null)
+          );
+        }),
         _react2.default.createElement(
           'p',
           null,
@@ -29812,7 +29830,7 @@ var ReactTerminal = exports.ReactTerminal = _react2.default.createClass({
             null,
             '>> '
           ),
-          this.state.text,
+          this.state.activeLine,
           _react2.default.createElement('br', null)
         )
       )
@@ -29827,18 +29845,22 @@ var create = exports.create = function create(element) {
 };
 
 var render = exports.render = function render(element) {
-  return _reactDom2.default.render(_react2.default.createElement(ReactTerminal, { text: '' }), element);
+  return _reactDom2.default.render(_react2.default.createElement(ReactTerminal, null), element);
 };
 
 var print = exports.print = function print(terminal, c) {
-  terminal.component.setState({ text: terminal.component.state.text + c });
+  var active = terminal.component.state.activeLine;
+  terminal.component.setState({ activeLine: active + c });
 };
 
 var newline = exports.newline = function newline(terminal) {
-  terminal.component.setState({ text: terminal.component.state.text + '<br />' });
+  var lines = terminal.component.state.lines;
+  var active = terminal.component.state.activeLine;
+  lines.push(active);
+  terminal.component.setState({ lines: lines, active: '' });
 };
 
-},{"react":467,"react-dom":298}],480:[function(require,module,exports){
+},{"react":467,"react-dom":298,"underscore":468}],480:[function(require,module,exports){
 'use strict';
 
 require('babel-polyfill');
