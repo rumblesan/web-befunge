@@ -15,9 +15,9 @@ import {cellCreationMenu} from './creationMenu';
 import {cellModificationMenu} from './modificationMenu';
 
 const gridConfig = {
-  xCells: 50,
-  yCells: 30,
-  cellSize: 70,
+  xCells: 80,
+  yCells: 25,
+  cellSize: 40,
   style: {
     stroke: 'black',
     background: 'white',
@@ -39,7 +39,7 @@ const cellStyle = {
   fill: '#FF8000',
   stroke: 'orangered',
   linewidth: 5,
-  textSize: 50
+  textSize: gridConfig.cellSize * 0.9
 };
 const pointerStyle = {
   noFill: true,

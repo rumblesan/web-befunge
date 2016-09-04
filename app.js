@@ -9248,9 +9248,9 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 /* global Two: false */
 
 var gridConfig = {
-  xCells: 50,
-  yCells: 30,
-  cellSize: 70,
+  xCells: 80,
+  yCells: 25,
+  cellSize: 40,
   style: {
     stroke: 'black',
     background: 'white',
@@ -9272,7 +9272,7 @@ var cellStyle = {
   fill: '#FF8000',
   stroke: 'orangered',
   linewidth: 5,
-  textSize: 50
+  textSize: gridConfig.cellSize * 0.9
 };
 var pointerStyle = {
   noFill: true,
