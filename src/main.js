@@ -162,7 +162,10 @@ const cellConstructor = (two, befunge) => {
   const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
 
-  const terminal = Terminal.create(document.getElementById('terminal-text'));
+  const terminal = Terminal.create(
+    document.getElementById('console')
+  );
+  console.log(terminal);
 
   const interpreter = Interpreter.create();
   const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
