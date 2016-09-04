@@ -10,6 +10,7 @@ import * as Cell    from './cell';
 import * as Interpreter from './interpreter';
 import * as PointerGFX  from './pointerGfx';
 import * as Terminal  from './terminal';
+import * as NavBar  from './navbar';
 
 import {cellCreationMenu} from './creationMenu';
 import {cellModificationMenu} from './modificationMenu';
@@ -162,31 +163,33 @@ const cellConstructor = (two, befunge) => {
   const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
 
+  NavBar.create(
+    document.getElementById('header'),
+    () => {
+      if (befunge.running) {
+        Befunge.stop(befunge);
+      } else {
+        Befunge.start(befunge);
+      }
+    },
+    () => {
+      if (befunge.running) {
+        Befunge.stop(befunge);
+      }
+      Befunge.resetPointer(befunge);
+    },
+    true
+  );
+
   const terminal = Terminal.create(
     document.getElementById('console')
   );
-  console.log(terminal);
 
   const interpreter = Interpreter.create();
   const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
   Befunge.start(befunge);
 
   two.update();
-
-  document.getElementById('toggle').addEventListener('click', () => {
-    if (befunge.running) {
-      Befunge.stop(befunge);
-    } else {
-      Befunge.start(befunge);
-    }
-  });
-
-  document.getElementById('restart').addEventListener('click', () => {
-    if (befunge.running) {
-      Befunge.stop(befunge);
-    }
-    Befunge.resetPointer(befunge);
-  });
 
   addGridInteractivity(two, befunge);
 

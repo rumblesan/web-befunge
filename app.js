@@ -29608,7 +29608,7 @@ var evaluate = function evaluate(befunge, cell) {
   console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
-},{"./befunge":469,"./pointer":477,"./terminal":479}],476:[function(require,module,exports){
+},{"./befunge":469,"./pointer":478,"./terminal":480}],476:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29697,6 +29697,74 @@ var CellEditButtonGfx = function CellEditButtonGfx(two, message, config) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.create = exports.NavBar = undefined;
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var NavBar = exports.NavBar = _react2.default.createClass({
+  displayName: 'NavBar',
+
+  getInitialState: function getInitialState() {
+    return {
+      running: this.props.running
+    };
+  },
+
+  toggleRunning: function toggleRunning() {
+    this.setState({
+      running: !this.state.running
+    }, this.props.startStop);
+  },
+
+  reset: function reset() {
+    this.setState({
+      running: false
+    }, this.props.reset);
+  },
+
+  render: function render() {
+    return _react2.default.createElement(
+      'div',
+      null,
+      _react2.default.createElement(
+        'span',
+        { className: 'control-item' },
+        'Befunge'
+      ),
+      _react2.default.createElement(
+        'span',
+        { onClick: this.toggleRunning, className: 'control-item' },
+        this.state.running ? 'Stop' : 'Start'
+      ),
+      _react2.default.createElement(
+        'span',
+        { onClick: this.reset, className: 'control-item' },
+        'Restart'
+      )
+    );
+  }
+});
+
+var create = exports.create = function create(el, startStopCb, resetCb, running) {
+  return {
+    component: _reactDom2.default.render(_react2.default.createElement(NavBar, { startStop: startStopCb, reset: resetCb, running: running }), el)
+  };
+};
+
+},{"react":467,"react-dom":298}],478:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 var Directions = exports.Directions = {
   up: 'up',
   right: 'right',
@@ -29746,7 +29814,7 @@ var move = exports.move = function move(pointer, grid) {
   }
 };
 
-},{}],478:[function(require,module,exports){
+},{}],479:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29761,7 +29829,7 @@ var create = exports.create = function create(two, grid, style) {
   return pointerGfx;
 };
 
-},{}],479:[function(require,module,exports){
+},{}],480:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29860,7 +29928,7 @@ var newline = exports.newline = function newline(terminal) {
   terminal.component.setState({ lines: lines, active: '' });
 };
 
-},{"react":467,"react-dom":298,"underscore":468}],480:[function(require,module,exports){
+},{"react":467,"react-dom":298,"underscore":468}],481:[function(require,module,exports){
 'use strict';
 
 require('babel-polyfill');
@@ -29893,13 +29961,15 @@ var _terminal = require('./terminal');
 
 var Terminal = _interopRequireWildcard(_terminal);
 
+var _navbar = require('./navbar');
+
+var NavBar = _interopRequireWildcard(_navbar);
+
 var _creationMenu = require('./creationMenu');
 
 var _modificationMenu = require('./modificationMenu');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-/* global Two: false */
 
 var gridConfig = {
   xCells: 80,
@@ -29910,7 +29980,8 @@ var gridConfig = {
     background: 'white',
     linewidth: 2
   }
-};
+}; /* global Two: false */
+
 var menuConfig = {
   buttonWidth: 50,
   buttonHeight: 50,
@@ -30042,8 +30113,20 @@ var cellConstructor = function cellConstructor(two, befunge) {
   var cellGfx = two.makeGroup();
   var pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
+  NavBar.create(document.getElementById('header'), function () {
+    if (befunge.running) {
+      Befunge.stop(befunge);
+    } else {
+      Befunge.start(befunge);
+    }
+  }, function () {
+    if (befunge.running) {
+      Befunge.stop(befunge);
+    }
+    Befunge.resetPointer(befunge);
+  }, true);
+
   var terminal = Terminal.create(document.getElementById('console'));
-  console.log(terminal);
 
   var interpreter = Interpreter.create();
   var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
@@ -30051,22 +30134,7 @@ var cellConstructor = function cellConstructor(two, befunge) {
 
   two.update();
 
-  document.getElementById('toggle').addEventListener('click', function () {
-    if (befunge.running) {
-      Befunge.stop(befunge);
-    } else {
-      Befunge.start(befunge);
-    }
-  });
-
-  document.getElementById('restart').addEventListener('click', function () {
-    if (befunge.running) {
-      Befunge.stop(befunge);
-    }
-    Befunge.resetPointer(befunge);
-  });
-
   addGridInteractivity(two, befunge);
 })();
 
-},{"./befunge":469,"./cell":470,"./creationMenu":471,"./grid":472,"./gridGfx":473,"./interpreter":475,"./modificationMenu":476,"./pointerGfx":478,"./terminal":479,"babel-polyfill":1}]},{},[480]);
+},{"./befunge":469,"./cell":470,"./creationMenu":471,"./grid":472,"./gridGfx":473,"./interpreter":475,"./modificationMenu":476,"./navbar":477,"./pointerGfx":479,"./terminal":480,"babel-polyfill":1}]},{},[481]);
