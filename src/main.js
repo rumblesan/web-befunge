@@ -9,8 +9,8 @@ import * as GridGFX from './gridGfx';
 import * as Cell    from './cell';
 import * as Interpreter from './interpreter';
 import * as PointerGFX  from './pointerGfx';
-import * as Terminal  from './terminal';
-import * as NavBar  from './navbar';
+import * as Terminal  from './ui/terminal';
+import * as NavBar  from './ui/navbar';
 
 import {cellCreationMenu} from './creationMenu';
 import {cellModificationMenu} from './modificationMenu';
