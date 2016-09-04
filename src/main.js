@@ -4,16 +4,16 @@ import 'babel-polyfill';
 
 import * as Befunge from './befunge';
 
-import * as Grid    from './grid';
-import * as GridGFX from './gridGfx';
-import * as Cell    from './cell';
-import * as Interpreter from './interpreter';
-import * as PointerGFX  from './pointerGfx';
+import * as Grid    from './befunge/grid';
+import * as GridGFX from './befunge/gridGfx';
+import * as Cell    from './befunge/cell';
+import * as Interpreter from './befunge/interpreter';
+import * as PointerGFX  from './befunge/pointerGfx';
 import * as Terminal  from './ui/terminal';
 import * as NavBar  from './ui/navbar';
 
-import {cellCreationMenu} from './creationMenu';
-import {cellModificationMenu} from './modificationMenu';
+import {cellCreationMenu} from './befunge/creationMenu';
+import {cellModificationMenu} from './befunge/modificationMenu';
 
 const gridConfig = {
   xCells: 80,

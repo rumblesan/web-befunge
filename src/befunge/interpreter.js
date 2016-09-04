@@ -1,7 +1,7 @@
 
-import * as Befunge from './befunge';
+import * as Befunge from '../befunge';
 import * as Pointer from './pointer';
-import * as Terminal from './terminal';
+import * as Terminal from '../ui/terminal';
 
 export const create = () => {
 

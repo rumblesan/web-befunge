@@ -29071,101 +29071,6 @@ module.exports = require('./lib/React');
 }.call(this));
 
 },{}],469:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
-
-var _interpreter = require('./interpreter');
-
-var Interpreter = _interopRequireWildcard(_interpreter);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-var create = exports.create = function create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal) {
-  return {
-    interpreter: interpreter,
-    grid: grid,
-    gridGfx: gridGfx,
-    cellGfx: cellGfx,
-    pointerGfx: pointerGfx,
-    running: false,
-    terminal: terminal
-  };
-};
-
-var addCell = exports.addCell = function addCell(befunge, x, y, cell) {
-  befunge.interpreter.cellPositions[[x, y]] = cell;
-  befunge.interpreter.cells.set(cell, [x, y]);
-  befunge.cellGfx.add(cell.gfx);
-};
-
-var getCell = exports.getCell = function getCell(befunge, x, y) {
-  return befunge.interpreter.cellPositions[[x, y]];
-};
-
-var startMovingCell = exports.startMovingCell = function startMovingCell(befunge, cell) {
-  var coords = befunge.interpreter.cells.get(cell);
-  befunge.interpreter.cellPositions[coords] = undefined;
-  return cell;
-};
-
-var finishMovingCell = exports.finishMovingCell = function finishMovingCell(befunge, x, y, cell) {
-  befunge.interpreter.cells.set(cell, [x, y]);
-  befunge.interpreter.cellPositions[[x, y]] = cell;
-};
-
-var deleteCell = exports.deleteCell = function deleteCell(befunge, cell) {
-  cell.gfx.remove();
-  var coords = befunge.interpreter.cells.get(cell);
-  delete befunge.interpreter.cellPositions[coords];
-  delete befunge.interpreter.cells[cell];
-};
-
-var start = exports.start = function start(befunge) {
-  if (befunge.running === false) {
-    befunge.running = true;
-    befunge.interpreter.timer = setInterval(function () {
-      Interpreter.interpret(befunge);
-      updatePointer(befunge);
-    }, befunge.interpreter.speed);
-  }
-};
-
-var stop = exports.stop = function stop(befunge) {
-  if (befunge.running) {
-    befunge.running = false;
-    clearInterval(befunge.interpreter.timer);
-  }
-};
-
-var updatePointer = exports.updatePointer = function updatePointer(befunge) {
-  var interpreter = befunge.interpreter;
-  var pointerGfx = befunge.pointerGfx;
-  var grid = befunge.grid;
-  var pointer = interpreter.pointer;
-
-  var newX = (pointer.x + 0.5) * grid.cellSize;
-  var newY = (pointer.y + 0.5) * grid.cellSize;
-  pointerGfx.translation.set(newX, newY);
-};
-
-var resetPointer = exports.resetPointer = function resetPointer(befunge) {
-  var interpreter = befunge.interpreter;
-  var pointerGfx = befunge.pointerGfx;
-  var grid = befunge.grid;
-  var pointer = interpreter.pointer;
-
-  pointer.x = 0;
-  pointer.y = 0;
-  var newX = (pointer.x + 0.5) * grid.cellSize;
-  var newY = (pointer.y + 0.5) * grid.cellSize;
-  pointerGfx.translation.set(newX, newY);
-};
-
-},{"./interpreter":475}],470:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29190,7 +29095,7 @@ var create = exports.create = function create(two, grid, xPos, yPos, instruction
   };
 };
 
-},{}],471:[function(require,module,exports){
+},{}],470:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29337,7 +29242,7 @@ var CellCreateButtonGfx = function CellCreateButtonGfx(two, message, config) {
   return svg;
 };
 
-},{"./instructions":474,"underscore":468}],472:[function(require,module,exports){
+},{"./instructions":474,"underscore":468}],471:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29364,7 +29269,7 @@ var getCoordinates = exports.getCoordinates = function getCoordinates(grid, scen
   };
 };
 
-},{}],473:[function(require,module,exports){
+},{}],472:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29403,7 +29308,102 @@ var create = exports.create = function create(two, config) {
   return gridGfx;
 };
 
-},{}],474:[function(require,module,exports){
+},{}],473:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
+
+var _interpreter = require('./interpreter');
+
+var Interpreter = _interopRequireWildcard(_interpreter);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+var create = exports.create = function create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal) {
+  return {
+    interpreter: interpreter,
+    grid: grid,
+    gridGfx: gridGfx,
+    cellGfx: cellGfx,
+    pointerGfx: pointerGfx,
+    running: false,
+    terminal: terminal
+  };
+};
+
+var addCell = exports.addCell = function addCell(befunge, x, y, cell) {
+  befunge.interpreter.cellPositions[[x, y]] = cell;
+  befunge.interpreter.cells.set(cell, [x, y]);
+  befunge.cellGfx.add(cell.gfx);
+};
+
+var getCell = exports.getCell = function getCell(befunge, x, y) {
+  return befunge.interpreter.cellPositions[[x, y]];
+};
+
+var startMovingCell = exports.startMovingCell = function startMovingCell(befunge, cell) {
+  var coords = befunge.interpreter.cells.get(cell);
+  befunge.interpreter.cellPositions[coords] = undefined;
+  return cell;
+};
+
+var finishMovingCell = exports.finishMovingCell = function finishMovingCell(befunge, x, y, cell) {
+  befunge.interpreter.cells.set(cell, [x, y]);
+  befunge.interpreter.cellPositions[[x, y]] = cell;
+};
+
+var deleteCell = exports.deleteCell = function deleteCell(befunge, cell) {
+  cell.gfx.remove();
+  var coords = befunge.interpreter.cells.get(cell);
+  delete befunge.interpreter.cellPositions[coords];
+  delete befunge.interpreter.cells[cell];
+};
+
+var start = exports.start = function start(befunge) {
+  if (befunge.running === false) {
+    befunge.running = true;
+    befunge.interpreter.timer = setInterval(function () {
+      Interpreter.interpret(befunge);
+      updatePointer(befunge);
+    }, befunge.interpreter.speed);
+  }
+};
+
+var stop = exports.stop = function stop(befunge) {
+  if (befunge.running) {
+    befunge.running = false;
+    clearInterval(befunge.interpreter.timer);
+  }
+};
+
+var updatePointer = exports.updatePointer = function updatePointer(befunge) {
+  var interpreter = befunge.interpreter;
+  var pointerGfx = befunge.pointerGfx;
+  var grid = befunge.grid;
+  var pointer = interpreter.pointer;
+
+  var newX = (pointer.x + 0.5) * grid.cellSize;
+  var newY = (pointer.y + 0.5) * grid.cellSize;
+  pointerGfx.translation.set(newX, newY);
+};
+
+var resetPointer = exports.resetPointer = function resetPointer(befunge) {
+  var interpreter = befunge.interpreter;
+  var pointerGfx = befunge.pointerGfx;
+  var grid = befunge.grid;
+  var pointer = interpreter.pointer;
+
+  pointer.x = 0;
+  pointer.y = 0;
+  var newX = (pointer.x + 0.5) * grid.cellSize;
+  var newY = (pointer.y + 0.5) * grid.cellSize;
+  pointerGfx.translation.set(newX, newY);
+};
+
+},{"./interpreter":475}],474:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29447,7 +29447,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.interpret = exports.create = undefined;
 
-var _befunge = require('./befunge');
+var _befunge = require('../befunge');
 
 var Befunge = _interopRequireWildcard(_befunge);
 
@@ -29455,7 +29455,7 @@ var _pointer = require('./pointer');
 
 var Pointer = _interopRequireWildcard(_pointer);
 
-var _terminal = require('./terminal');
+var _terminal = require('../ui/terminal');
 
 var Terminal = _interopRequireWildcard(_terminal);
 
@@ -29608,7 +29608,7 @@ var evaluate = function evaluate(befunge, cell) {
   console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
-},{"./befunge":469,"./pointer":477,"./terminal":479}],476:[function(require,module,exports){
+},{"../befunge":473,"../ui/terminal":480,"./pointer":477}],476:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29767,6 +29767,74 @@ var create = exports.create = function create(two, grid, style) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.create = exports.NavBar = undefined;
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var NavBar = exports.NavBar = _react2.default.createClass({
+  displayName: 'NavBar',
+
+  getInitialState: function getInitialState() {
+    return {
+      running: this.props.running
+    };
+  },
+
+  toggleRunning: function toggleRunning() {
+    this.setState({
+      running: !this.state.running
+    }, this.props.startStop);
+  },
+
+  reset: function reset() {
+    this.setState({
+      running: false
+    }, this.props.reset);
+  },
+
+  render: function render() {
+    return _react2.default.createElement(
+      'div',
+      null,
+      _react2.default.createElement(
+        'span',
+        { className: 'control-item' },
+        'Befunge'
+      ),
+      _react2.default.createElement(
+        'span',
+        { onClick: this.toggleRunning, className: 'control-item' },
+        this.state.running ? 'Stop' : 'Start'
+      ),
+      _react2.default.createElement(
+        'span',
+        { onClick: this.reset, className: 'control-item' },
+        'Restart'
+      )
+    );
+  }
+});
+
+var create = exports.create = function create(el, startStopCb, resetCb, running) {
+  return {
+    component: _reactDom2.default.render(_react2.default.createElement(NavBar, { startStop: startStopCb, reset: resetCb, running: running }), el)
+  };
+};
+
+},{"react":467,"react-dom":298}],480:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.newline = exports.print = exports.render = exports.create = exports.ReactTerminal = undefined;
 
 var _react = require('react');
@@ -29860,77 +29928,7 @@ var newline = exports.newline = function newline(terminal) {
   terminal.component.setState({ lines: lines, active: '' });
 };
 
-},{"react":467,"react-dom":298,"underscore":468}],480:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.create = exports.NavBar = undefined;
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactDom = require('react-dom');
-
-var _reactDom2 = _interopRequireDefault(_reactDom);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var NavBar = exports.NavBar = _react2.default.createClass({
-  displayName: 'NavBar',
-
-  getInitialState: function getInitialState() {
-    return {
-      running: this.props.running
-    };
-  },
-
-  toggleRunning: function toggleRunning() {
-    this.setState({
-      running: !this.state.running
-    }, this.props.startStop);
-  },
-
-  reset: function reset() {
-    this.setState({
-      running: false
-    }, this.props.reset);
-  },
-
-  render: function render() {
-    return _react2.default.createElement(
-      'div',
-      null,
-      _react2.default.createElement(
-        'span',
-        { className: 'control-item' },
-        'Befunge'
-      ),
-      _react2.default.createElement(
-        'span',
-        { onClick: this.toggleRunning, className: 'control-item' },
-        this.state.running ? 'Stop' : 'Start'
-      ),
-      _react2.default.createElement(
-        'span',
-        { onClick: this.reset, className: 'control-item' },
-        'Restart'
-      )
-    );
-  }
-});
-
-var create = exports.create = function create(el, startStopCb, resetCb, running) {
-  return {
-    component: _reactDom2.default.render(_react2.default.createElement(NavBar, { startStop: startStopCb, reset: resetCb, running: running }), el)
-  };
-};
-
-},{"react":467,"react-dom":298}],481:[function(require,module,exports){
-arguments[4][479][0].apply(exports,arguments)
-},{"dup":479,"react":467,"react-dom":298,"underscore":468}],482:[function(require,module,exports){
+},{"react":467,"react-dom":298,"underscore":468}],481:[function(require,module,exports){
 'use strict';
 
 require('babel-polyfill');
@@ -29939,23 +29937,23 @@ var _befunge = require('./befunge');
 
 var Befunge = _interopRequireWildcard(_befunge);
 
-var _grid = require('./grid');
+var _grid = require('./befunge/grid');
 
 var Grid = _interopRequireWildcard(_grid);
 
-var _gridGfx = require('./gridGfx');
+var _gridGfx = require('./befunge/gridGfx');
 
 var GridGFX = _interopRequireWildcard(_gridGfx);
 
-var _cell = require('./cell');
+var _cell = require('./befunge/cell');
 
 var Cell = _interopRequireWildcard(_cell);
 
-var _interpreter = require('./interpreter');
+var _interpreter = require('./befunge/interpreter');
 
 var Interpreter = _interopRequireWildcard(_interpreter);
 
-var _pointerGfx = require('./pointerGfx');
+var _pointerGfx = require('./befunge/pointerGfx');
 
 var PointerGFX = _interopRequireWildcard(_pointerGfx);
 
@@ -29967,9 +29965,9 @@ var _navbar = require('./ui/navbar');
 
 var NavBar = _interopRequireWildcard(_navbar);
 
-var _creationMenu = require('./creationMenu');
+var _creationMenu = require('./befunge/creationMenu');
 
-var _modificationMenu = require('./modificationMenu');
+var _modificationMenu = require('./befunge/modificationMenu');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -30139,4 +30137,4 @@ var cellConstructor = function cellConstructor(two, befunge) {
   addGridInteractivity(two, befunge);
 })();
 
-},{"./befunge":469,"./cell":470,"./creationMenu":471,"./grid":472,"./gridGfx":473,"./interpreter":475,"./modificationMenu":476,"./pointerGfx":478,"./ui/navbar":480,"./ui/terminal":481,"babel-polyfill":1}]},{},[482]);
+},{"./befunge":473,"./befunge/cell":469,"./befunge/creationMenu":470,"./befunge/grid":471,"./befunge/gridGfx":472,"./befunge/interpreter":475,"./befunge/modificationMenu":476,"./befunge/pointerGfx":478,"./ui/navbar":479,"./ui/terminal":480,"babel-polyfill":1}]},{},[481]);
