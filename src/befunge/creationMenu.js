@@ -3,14 +3,11 @@
 import Instructions from './instructions';
 import _ from 'underscore';
 
-const isValid = /^[0-9a-zA-Z]$/;
-const isInt = /^[0-9]$/;
-const isChar = /^[a-zA-Z]$/;
-
 export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
+  const instructions = _.values(Instructions.charInstructions);
   const {buttonColumns, buttonWidth, buttonHeight} = menuConfig;
-  const rows = Math.ceil(Instructions.count / buttonColumns);
+  const rows = Math.ceil(instructions.length / buttonColumns);
   const menuWidth = (buttonWidth * buttonColumns);
   // Extra row is for char input
   const menuHeight = (rows + 1) * buttonHeight;
@@ -26,7 +23,6 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
   const xOffset = (menuWidth - buttonWidth) / 2;
   const yOffset = (menuHeight - buttonHeight) / 2;
-  const instructions = _.values(Instructions.charInstructions);
 
   for (let x = 0; x < buttonColumns; x += 1) {
     for (let y = 0; y < rows; y += 1) {
@@ -49,9 +45,9 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
   const charInput = CharInput(two, menuConfig);
   charInput.svg.translation.set(0, (rows * buttonHeight) - yOffset);
   charInput.click = (c) => {
-    if (isChar.test(c)) {
+    if (Instructions.check.isChar.test(c)) {
       cellConstructor(Instructions.charInst(c), coords);
-    } else if (isInt.test(c)) {
+    } else if (Instructions.check.isInt.test(c)) {
       cellConstructor(Instructions.intInst(c), coords);
     }
   };
@@ -94,7 +90,7 @@ const menuInteraction = (menu) => {
 
   const keyListen = (e) => {
     e.preventDefault();
-    if (isValid.test(e.key)) {
+    if (Instructions.check.isValid.test(e.key)) {
       menu.charInput.textSvg.value = e.key;
       menu.charInput.value = e.key;
     }
