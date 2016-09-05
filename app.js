@@ -29558,7 +29558,7 @@ var reset = exports.reset = function reset(interpreter) {
   interpreter.cells = new Map();
   clearInterval(interpreter.timer);
   interpreter.timer = null;
-  interpreter.pointer = Pointer.reset(interpreter.pointer);
+  Pointer.reset(interpreter.pointer);
   interpreter.stringMode = false;
 };
 
