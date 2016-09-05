@@ -1,6 +1,6 @@
 /* global Two: false */
 
-import Instructions from './instructions';
+import * as Instructions from './instructions';
 import _ from 'underscore';
 
 export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
@@ -45,10 +45,9 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
   const charInput = CharInput(two, menuConfig);
   charInput.svg.translation.set(0, (rows * buttonHeight) - yOffset);
   charInput.click = (c) => {
-    if (Instructions.check.isChar.test(c)) {
-      cellConstructor(Instructions.charInst(c), coords);
-    } else if (Instructions.check.isInt.test(c)) {
-      cellConstructor(Instructions.intInst(c), coords);
+    const inst = Instructions.getInstruction(c);
+    if (inst) {
+      cellConstructor(inst, coords);
     }
   };
   menu.svg.add(charInput.svg);
@@ -90,7 +89,7 @@ const menuInteraction = (menu) => {
 
   const keyListen = (e) => {
     e.preventDefault();
-    if (Instructions.check.isValid.test(e.key)) {
+    if (Instructions.isValid(e.key)) {
       menu.charInput.textSvg.value = e.key;
       menu.charInput.value = e.key;
     }

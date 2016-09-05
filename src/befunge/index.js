@@ -2,7 +2,7 @@ import * as Interpreter from './interpreter';
 
 import _ from 'underscore';
 
-import Instructions from './instructions';
+import * as Instructions from './instructions';
 
 export const create = (interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal) => {
   return {
@@ -71,23 +71,23 @@ export const updateProgram = (befunge, text, cellConstructor) => {
   clearAll(befunge);
   const {grid} = befunge;
   const lines = text.split('\n');
-  let instruction, i;
-  _.each(lines, (line, y) => {
-    _.each(line, (c, x) => {
-      i = Instructions.charInstructions[c];
-      if (i) {
-        instruction = i;
-      } else if (Instructions.check.isInt.test(c)) {
-        instruction = Instructions.intInst(c);
-      } else if (Instructions.check.isChar.test(c)) {
-        instruction = Instructions.charInst(c);
+  let instruction, line, c;
+  for (let y = 0; y < grid.yCells; y += 1) {
+    for (let x = 0; x < grid.xCells; x += 1) {
+      line = lines[y];
+      if (line === undefined) {
+        continue;
       }
-      if (instruction && x < grid.xCells && y < grid.yCells) {
-        console.log(x, y, c);
+      c = line[x];
+      if (c === undefined) {
+        continue;
+      }
+      instruction = Instructions.getInstruction(c);
+      if (instruction) {
         cellConstructor(instruction, {x: x, y: y});
       }
-    });
-  });
+    }
+  }
 };
 
 export const start = (befunge) => {

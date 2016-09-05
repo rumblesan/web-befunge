@@ -29105,7 +29105,7 @@ exports.cellCreationMenu = undefined;
 
 var _instructions = require('./instructions');
 
-var _instructions2 = _interopRequireDefault(_instructions);
+var Instructions = _interopRequireWildcard(_instructions);
 
 var _underscore = require('underscore');
 
@@ -29113,11 +29113,13 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 /* global Two: false */
 
 var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two, coords, cellConstructor, menuConfig) {
 
-  var instructions = _underscore2.default.values(_instructions2.default.charInstructions);
+  var instructions = _underscore2.default.values(Instructions.charInstructions);
   var buttonColumns = menuConfig.buttonColumns;
   var buttonWidth = menuConfig.buttonWidth;
   var buttonHeight = menuConfig.buttonHeight;
@@ -29163,10 +29165,9 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
   var charInput = CharInput(two, menuConfig);
   charInput.svg.translation.set(0, rows * buttonHeight - yOffset);
   charInput.click = function (c) {
-    if (_instructions2.default.check.isChar.test(c)) {
-      cellConstructor(_instructions2.default.charInst(c), coords);
-    } else if (_instructions2.default.check.isInt.test(c)) {
-      cellConstructor(_instructions2.default.intInst(c), coords);
+    var inst = Instructions.getInstruction(c);
+    if (inst) {
+      cellConstructor(inst, coords);
     }
   };
   menu.svg.add(charInput.svg);
@@ -29207,7 +29208,7 @@ var menuInteraction = function menuInteraction(menu) {
 
   var keyListen = function keyListen(e) {
     e.preventDefault();
-    if (_instructions2.default.check.isValid.test(e.key)) {
+    if (Instructions.isValid(e.key)) {
       menu.charInput.textSvg.value = e.key;
       menu.charInput.value = e.key;
     }
@@ -29324,7 +29325,7 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 var _instructions = require('./instructions');
 
-var _instructions2 = _interopRequireDefault(_instructions);
+var Instructions = _interopRequireWildcard(_instructions);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -29402,23 +29403,24 @@ var updateProgram = exports.updateProgram = function updateProgram(befunge, text
 
   var lines = text.split('\n');
   var instruction = void 0,
-      i = void 0;
-  _underscore2.default.each(lines, function (line, y) {
-    _underscore2.default.each(line, function (c, x) {
-      i = _instructions2.default.charInstructions[c];
-      if (i) {
-        instruction = i;
-      } else if (_instructions2.default.check.isInt.test(c)) {
-        instruction = _instructions2.default.intInst(c);
-      } else if (_instructions2.default.check.isChar.test(c)) {
-        instruction = _instructions2.default.charInst(c);
+      line = void 0,
+      c = void 0;
+  for (var y = 0; y < grid.yCells; y += 1) {
+    for (var x = 0; x < grid.xCells; x += 1) {
+      line = lines[y];
+      if (line === undefined) {
+        continue;
       }
-      if (instruction && x < grid.xCells && y < grid.yCells) {
-        console.log(x, y, c);
+      c = line[x];
+      if (c === undefined) {
+        continue;
+      }
+      instruction = Instructions.getInstruction(c);
+      if (instruction) {
         cellConstructor(instruction, { x: x, y: y });
       }
-    });
-  });
+    }
+  }
 };
 
 var start = exports.start = function start(befunge) {
@@ -29472,36 +29474,57 @@ Object.defineProperty(exports, "__esModule", {
 var inst = function inst(c) {
   return { symbol: c, instruction: c, value: c.charCodeAt() };
 };
-exports.default = {
-  check: {
-    isValid: /^[0-9a-zA-Z]$/,
-    isInt: /^[0-9]$/,
-    isChar: /^[a-zA-Z]$/
-  },
-  charInst: function charInst(c) {
-    return { symbol: c, instruction: 'c', value: c.charCodeAt() };
-  },
-  intInst: function intInst(i) {
-    return { symbol: i, instruction: 'i', value: parseInt(i, 10) };
-  },
-  charInstructions: {
-    '^': inst('^'),
-    '>': inst('>'),
-    'v': inst('v'),
-    '<': inst('<'),
-    '_': inst('_'),
-    '|': inst('|'),
-    '@': inst('@'),
-    '+': inst('+'),
-    '-': inst('-'),
-    '*': inst('*'),
-    '/': inst('/'),
-    ':': inst(':'),
-    '\\': inst('\\'),
-    '"': inst('"'),
-    '.': inst('.'),
-    ',': inst(',')
+
+var charInstructions = exports.charInstructions = {
+  '^': inst('^'),
+  '>': inst('>'),
+  'v': inst('v'),
+  '<': inst('<'),
+  '_': inst('_'),
+  '|': inst('|'),
+  '@': inst('@'),
+  '+': inst('+'),
+  '-': inst('-'),
+  '*': inst('*'),
+  '/': inst('/'),
+  ':': inst(':'),
+  '\\': inst('\\'),
+  '"': inst('"'),
+  '.': inst('.'),
+  ',': inst(',')
+};
+
+var isIntRe = /^[0-9]$/;
+var isCharRe = /^[a-zA-Z]$/;
+
+var charInst = function charInst(c) {
+  return { symbol: c, instruction: 'c', value: c.charCodeAt() };
+};
+var intInst = function intInst(i) {
+  return { symbol: i, instruction: 'i', value: parseInt(i, 10) };
+};
+
+var isValid = exports.isValid = function isValid(c) {
+  return charInstructions[c] !== undefined || isCharRe.test(c) || isIntRe.test(c);
+};
+
+var isInt = exports.isInt = function isInt(c) {
+  return isIntRe.test(c);
+};
+
+var isChar = exports.isChar = function isChar(c) {
+  return isCharRe.test(c);
+};
+
+var getInstruction = exports.getInstruction = function getInstruction(c) {
+  if (charInstructions[c]) {
+    return charInstructions[c];
+  } else if (isChar(c)) {
+    return charInst(c);
+  } else if (isInt(c)) {
+    return intInst(c);
   }
+  return null;
 };
 
 },{}],475:[function(require,module,exports){
