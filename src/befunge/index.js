@@ -44,6 +44,11 @@ export const deleteCell = (befunge, cell) => {
   delete(befunge.interpreter.cells[cell]);
 };
 
+export const clearAll = (befunge) => {
+  Interpreter.reset(befunge.interpreter);
+  _.each(befunge.cellGfx.children, (c) => c.remove());
+};
+
 export const getProgram = (befunge) => {
   const {grid} = befunge;
   let programtext = '';
@@ -63,12 +68,12 @@ export const getProgram = (befunge) => {
 };
 
 export const updateProgram = (befunge, text, cellConstructor) => {
+  clearAll(befunge);
   const {grid} = befunge;
   const lines = text.split('\n');
   let instruction, i;
   _.each(lines, (line, y) => {
     _.each(line, (c, x) => {
-
       i = Instructions.charInstructions[c];
       if (i) {
         instruction = i;

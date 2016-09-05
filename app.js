@@ -29312,7 +29312,7 @@ var create = exports.create = function create(two, config) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
+exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.clearAll = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
 
 var _interpreter = require('./interpreter');
 
@@ -29370,6 +29370,13 @@ var deleteCell = exports.deleteCell = function deleteCell(befunge, cell) {
   delete befunge.interpreter.cells[cell];
 };
 
+var clearAll = exports.clearAll = function clearAll(befunge) {
+  Interpreter.reset(befunge.interpreter);
+  _underscore2.default.each(befunge.cellGfx.children, function (c) {
+    return c.remove();
+  });
+};
+
 var getProgram = exports.getProgram = function getProgram(befunge) {
   var grid = befunge.grid;
 
@@ -29390,6 +29397,7 @@ var getProgram = exports.getProgram = function getProgram(befunge) {
 };
 
 var updateProgram = exports.updateProgram = function updateProgram(befunge, text, cellConstructor) {
+  clearAll(befunge);
   var grid = befunge.grid;
 
   var lines = text.split('\n');
@@ -29397,7 +29405,6 @@ var updateProgram = exports.updateProgram = function updateProgram(befunge, text
       i = void 0;
   _underscore2.default.each(lines, function (line, y) {
     _underscore2.default.each(line, function (c, x) {
-
       i = _instructions2.default.charInstructions[c];
       if (i) {
         instruction = i;
@@ -29503,7 +29510,7 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.interpret = exports.create = undefined;
+exports.interpret = exports.reset = exports.create = undefined;
 
 var _befunge = require('../befunge');
 
@@ -29543,6 +29550,16 @@ var push = function push(interpreter, value) {
 var pop = function pop(interpreter) {
   console.log(interpreter.stack);
   return interpreter.stack.pop();
+};
+
+var reset = exports.reset = function reset(interpreter) {
+  interpreter.cellPositions = {};
+  interpreter.stack = [];
+  interpreter.cells = new Map();
+  clearInterval(interpreter.timer);
+  interpreter.timer = null;
+  interpreter.pointer = Pointer.reset(interpreter.pointer);
+  interpreter.stringMode = false;
 };
 
 var interpret = exports.interpret = function interpret(befunge) {
@@ -29771,6 +29788,12 @@ var create = exports.create = function create() {
   };
 
   return pointer;
+};
+
+var reset = exports.reset = function reset(pointer) {
+  pointer.x = 0;
+  pointer.y = 0;
+  pointer.direction = Directions.right;
 };
 
 var move = exports.move = function move(pointer, grid) {
