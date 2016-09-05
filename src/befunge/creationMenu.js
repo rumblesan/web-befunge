@@ -3,9 +3,9 @@
 import Instructions from './instructions';
 import _ from 'underscore';
 
-const isValid = /[0-9a-zA-Z]/;
-const isInt = /[0-9]/;
-const isChar = /[a-zA-Z]/;
+const isValid = /^[0-9a-zA-Z]$/;
+const isInt = /^[0-9]$/;
+const isChar = /^[a-zA-Z]$/;
 
 export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
