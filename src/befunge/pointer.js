@@ -18,6 +18,12 @@ export const create = () => {
 
 };
 
+export const reset = (pointer) => {
+  pointer.x = 0;
+  pointer.y = 0;
+  pointer.direction = Directions.right;
+};
+
 export const move = (pointer, grid) => {
   switch (pointer.direction) {
   case Directions.up:
