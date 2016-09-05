@@ -26,10 +26,11 @@ export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
 
   const xOffset = (menuWidth - buttonWidth) / 2;
   const yOffset = (menuHeight - buttonHeight) / 2;
+  const instructions = _.values(Instructions.charInstructions);
 
   for (let x = 0; x < buttonColumns; x += 1) {
     for (let y = 0; y < rows; y += 1) {
-      let inst = Instructions[(y * buttonColumns) + x];
+      let inst = instructions[(y * buttonColumns) + x];
       if (inst) {
         let buttonGfx = CellCreateButtonGfx(two, inst.symbol, menuConfig);
         buttonGfx.translation.set(
