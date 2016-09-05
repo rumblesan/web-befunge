@@ -29,6 +29,16 @@ const pop = (interpreter) => {
   return interpreter.stack.pop();
 };
 
+export const reset = (interpreter) => {
+  interpreter.cellPositions = {};
+  interpreter.stack = [];
+  interpreter.cells = new Map();
+  clearInterval(interpreter.timer);
+  interpreter.timer = null;
+  interpreter.pointer = Pointer.reset(interpreter.pointer);
+  interpreter.stringMode = false;
+};
+
 export const interpret = (befunge) => {
   const {interpreter, grid} = befunge;
   const {pointer} = interpreter;
