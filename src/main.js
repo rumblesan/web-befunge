@@ -166,6 +166,15 @@ const cellConstructor = (two, befunge) => {
   const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
 
+  const terminal = Terminal.create(
+    document.getElementById('console')
+  );
+
+  const interpreter = Interpreter.create();
+  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
+
+  const newCell = cellConstructor(two, befunge);
+
   ReactDOM.render(
     <NavBar
       startStop={() => { befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);}}
@@ -177,17 +186,12 @@ const cellConstructor = (two, befunge) => {
           Befunge.resetPointer(befunge);
         }
       }
-      updateprogram={(text) => console.log('update', text)}
+      updateprogram={(text) => Befunge.updateProgram(befunge, text, newCell)}
+      befunge={befunge}
       running={true} />,
     document.getElementById('header'),
   );
 
-  const terminal = Terminal.create(
-    document.getElementById('console')
-  );
-
-  const interpreter = Interpreter.create();
-  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
   Befunge.start(befunge);
 
   two.update();

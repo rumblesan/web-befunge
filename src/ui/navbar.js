@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom';
 
 import ProgramText from './programText';
 
+import * as Befunge from '../befunge';
+
 export default React.createClass({
   getInitialState: function () {
     return {
@@ -46,7 +48,7 @@ export default React.createClass({
             <span onClick={this.reset} className='control-item'>Restart</span>
             <span onClick={this.programtext} className='control-item'>Program Text</span>
         </div>
-        {this.state.showtext ? <ProgramText text='foo' close={this.programtext} update={this.updatetext} /> : <div></div>}
+        {this.state.showtext ? <ProgramText text={Befunge.getProgram(this.props.befunge)} close={this.programtext} update={this.updatetext} /> : <div></div>}
       </div>
     );
   }

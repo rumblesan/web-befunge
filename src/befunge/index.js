@@ -1,5 +1,9 @@
 import * as Interpreter from './interpreter';
 
+import _ from 'underscore';
+
+import Instructions from './instructions';
+
 export const create = (interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal) => {
   return {
     interpreter: interpreter,
@@ -38,6 +42,47 @@ export const deleteCell = (befunge, cell) => {
   const coords = befunge.interpreter.cells.get(cell);
   delete(befunge.interpreter.cellPositions[coords]);
   delete(befunge.interpreter.cells[cell]);
+};
+
+export const getProgram = (befunge) => {
+  const {grid} = befunge;
+  let programtext = '';
+  let cell;
+  for (let y = 0; y < grid.yCells; y += 1) {
+    for (let x = 0; x < grid.xCells; x += 1) {
+      cell = getCell(befunge, x, y);
+      if (cell) {
+        programtext += cell.instruction.symbol;
+      } else {
+        programtext += ' ';
+      }
+    }
+    programtext += '\n';
+  }
+  return programtext;
+};
+
+export const updateProgram = (befunge, text, cellConstructor) => {
+  const {grid} = befunge;
+  const lines = text.split('\n');
+  let instruction, i;
+  _.each(lines, (line, y) => {
+    _.each(line, (c, x) => {
+
+      i = Instructions.charInstructions[c];
+      if (i) {
+        instruction = i;
+      } else if (Instructions.check.isInt.test(c)) {
+        instruction = Instructions.intInst(c);
+      } else if (Instructions.check.isChar.test(c)) {
+        instruction = Instructions.charInst(c);
+      }
+      if (instruction && x < grid.xCells && y < grid.yCells) {
+        console.log(x, y, c);
+        cellConstructor(instruction, {x: x, y: y});
+      }
+    });
+  });
 };
 
 export const start = (befunge) => {

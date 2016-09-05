@@ -29115,16 +29115,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /* global Two: false */
 
-var isValid = /[0-9a-zA-Z]/;
-var isInt = /[0-9]/;
-var isChar = /[a-zA-Z]/;
-
 var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two, coords, cellConstructor, menuConfig) {
+
+  var instructions = _underscore2.default.values(_instructions2.default.charInstructions);
   var buttonColumns = menuConfig.buttonColumns;
   var buttonWidth = menuConfig.buttonWidth;
   var buttonHeight = menuConfig.buttonHeight;
 
-  var rows = Math.ceil(_instructions2.default.count / buttonColumns);
+  var rows = Math.ceil(instructions.length / buttonColumns);
   var menuWidth = buttonWidth * buttonColumns;
   // Extra row is for char input
   var menuHeight = (rows + 1) * buttonHeight;
@@ -29143,7 +29141,7 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
 
   for (var x = 0; x < buttonColumns; x += 1) {
     var _loop = function _loop(y) {
-      var inst = _instructions2.default[y * buttonColumns + x];
+      var inst = instructions[y * buttonColumns + x];
       if (inst) {
         var buttonGfx = CellCreateButtonGfx(two, inst.symbol, menuConfig);
         buttonGfx.translation.set(x * buttonWidth - xOffset, y * buttonHeight - yOffset);
@@ -29165,9 +29163,9 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(two,
   var charInput = CharInput(two, menuConfig);
   charInput.svg.translation.set(0, rows * buttonHeight - yOffset);
   charInput.click = function (c) {
-    if (isChar.test(c)) {
+    if (_instructions2.default.check.isChar.test(c)) {
       cellConstructor(_instructions2.default.charInst(c), coords);
-    } else if (isInt.test(c)) {
+    } else if (_instructions2.default.check.isInt.test(c)) {
       cellConstructor(_instructions2.default.intInst(c), coords);
     }
   };
@@ -29209,7 +29207,7 @@ var menuInteraction = function menuInteraction(menu) {
 
   var keyListen = function keyListen(e) {
     e.preventDefault();
-    if (isValid.test(e.key)) {
+    if (_instructions2.default.check.isValid.test(e.key)) {
       menu.charInput.textSvg.value = e.key;
       menu.charInput.value = e.key;
     }
@@ -29314,11 +29312,21 @@ var create = exports.create = function create(two, config) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
+exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
 
 var _interpreter = require('./interpreter');
 
 var Interpreter = _interopRequireWildcard(_interpreter);
+
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _instructions = require('./instructions');
+
+var _instructions2 = _interopRequireDefault(_instructions);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -29362,6 +29370,50 @@ var deleteCell = exports.deleteCell = function deleteCell(befunge, cell) {
   delete befunge.interpreter.cells[cell];
 };
 
+var getProgram = exports.getProgram = function getProgram(befunge) {
+  var grid = befunge.grid;
+
+  var programtext = '';
+  var cell = void 0;
+  for (var y = 0; y < grid.yCells; y += 1) {
+    for (var x = 0; x < grid.xCells; x += 1) {
+      cell = getCell(befunge, x, y);
+      if (cell) {
+        programtext += cell.instruction.symbol;
+      } else {
+        programtext += ' ';
+      }
+    }
+    programtext += '\n';
+  }
+  return programtext;
+};
+
+var updateProgram = exports.updateProgram = function updateProgram(befunge, text, cellConstructor) {
+  var grid = befunge.grid;
+
+  var lines = text.split('\n');
+  var instruction = void 0,
+      i = void 0;
+  _underscore2.default.each(lines, function (line, y) {
+    _underscore2.default.each(line, function (c, x) {
+
+      i = _instructions2.default.charInstructions[c];
+      if (i) {
+        instruction = i;
+      } else if (_instructions2.default.check.isInt.test(c)) {
+        instruction = _instructions2.default.intInst(c);
+      } else if (_instructions2.default.check.isChar.test(c)) {
+        instruction = _instructions2.default.charInst(c);
+      }
+      if (instruction && x < grid.xCells && y < grid.yCells) {
+        console.log(x, y, c);
+        cellConstructor(instruction, { x: x, y: y });
+      }
+    });
+  });
+};
+
 var start = exports.start = function start(befunge) {
   if (befunge.running === false) {
     befunge.running = true;
@@ -29403,7 +29455,7 @@ var resetPointer = exports.resetPointer = function resetPointer(befunge) {
   pointerGfx.translation.set(newX, newY);
 };
 
-},{"./interpreter":475}],474:[function(require,module,exports){
+},{"./instructions":474,"./interpreter":475,"underscore":468}],474:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29414,29 +29466,35 @@ var inst = function inst(c) {
   return { symbol: c, instruction: c, value: c.charCodeAt() };
 };
 exports.default = {
-  count: 16,
+  check: {
+    isValid: /^[0-9a-zA-Z]$/,
+    isInt: /^[0-9]$/,
+    isChar: /^[a-zA-Z]$/
+  },
   charInst: function charInst(c) {
     return { symbol: c, instruction: 'c', value: c.charCodeAt() };
   },
   intInst: function intInst(i) {
     return { symbol: i, instruction: 'i', value: parseInt(i, 10) };
   },
-  0: inst('^'),
-  1: inst('>'),
-  2: inst('v'),
-  3: inst('<'),
-  4: inst('_'),
-  5: inst('|'),
-  6: inst('@'),
-  7: inst('+'),
-  8: inst('-'),
-  9: inst('*'),
-  10: inst('/'),
-  11: inst(':'),
-  12: inst('\\'),
-  13: inst('"'),
-  14: inst('.'),
-  15: inst(',')
+  charInstructions: {
+    '^': inst('^'),
+    '>': inst('>'),
+    'v': inst('v'),
+    '<': inst('<'),
+    '_': inst('_'),
+    '|': inst('|'),
+    '@': inst('@'),
+    '+': inst('+'),
+    '-': inst('-'),
+    '*': inst('*'),
+    '/': inst('/'),
+    ':': inst(':'),
+    '\\': inst('\\'),
+    '"': inst('"'),
+    '.': inst('.'),
+    ',': inst(',')
+  }
 };
 
 },{}],475:[function(require,module,exports){
@@ -29780,6 +29838,12 @@ var _programText = require('./programText');
 
 var _programText2 = _interopRequireDefault(_programText);
 
+var _befunge = require('../befunge');
+
+var Befunge = _interopRequireWildcard(_befunge);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _react2.default.createClass({
@@ -29844,12 +29908,12 @@ exports.default = _react2.default.createClass({
           'Program Text'
         )
       ),
-      this.state.showtext ? _react2.default.createElement(_programText2.default, { text: 'foo', close: this.programtext, update: this.updatetext }) : _react2.default.createElement('div', null)
+      this.state.showtext ? _react2.default.createElement(_programText2.default, { text: Befunge.getProgram(this.props.befunge), close: this.programtext, update: this.updatetext }) : _react2.default.createElement('div', null)
     );
   }
 });
 
-},{"./programText":480,"react":467,"react-dom":298}],480:[function(require,module,exports){
+},{"../befunge":473,"./programText":480,"react":467,"react-dom":298}],480:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -30182,6 +30246,13 @@ var cellConstructor = function cellConstructor(two, befunge) {
   var cellGfx = two.makeGroup();
   var pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
+  var terminal = Terminal.create(document.getElementById('console'));
+
+  var interpreter = Interpreter.create();
+  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
+
+  var newCell = cellConstructor(two, befunge);
+
   _reactDom2.default.render(_react2.default.createElement(_navbar2.default, {
     startStop: function startStop() {
       befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);
@@ -30193,14 +30264,11 @@ var cellConstructor = function cellConstructor(two, befunge) {
       Befunge.resetPointer(befunge);
     },
     updateprogram: function updateprogram(text) {
-      return console.log('update', text);
+      return Befunge.updateProgram(befunge, text, newCell);
     },
+    befunge: befunge,
     running: true }), document.getElementById('header'));
 
-  var terminal = Terminal.create(document.getElementById('console'));
-
-  var interpreter = Interpreter.create();
-  var befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
   Befunge.start(befunge);
 
   two.update();
