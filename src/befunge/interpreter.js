@@ -29,6 +29,10 @@ export const getCell = (interpreter, x, y) => {
   return interpreter.cells.get(`${x},${y}`);
 };
 
+export const getAllCells = (interpreter) => {
+  return interpreter.cells.values();
+};
+
 export const getCellPosition = (interpreter, cell) => {
   return interpreter.cellPositions.get(cell);
 };

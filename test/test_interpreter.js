@@ -20,6 +20,32 @@ describe('Interpreter', function () {
     });
   });
 
+  describe('getAllCells()', function () {
+    it('should return the position a cell was added to', function () {
+
+      const i = Interpreter.create();
+      const c1 = {name: 'cell1'};
+      const c2 = {name: 'cell2'};
+      const c3 = {name: 'cell3'};
+      Interpreter.addCell(i, 0, 0, c1);
+      Interpreter.addCell(i, 1, 1, c2);
+      Interpreter.addCell(i, 2, 2, c3);
+
+      const cells = Interpreter.getAllCells(i);
+
+      const cellList = [];
+      for (const c of cells) {
+        cellList.push(c);
+      }
+      const expected = [];
+      expected.push(c1);
+      expected.push(c2);
+      expected.push(c3);
+
+      assert.deepEqual(expected, cellList);
+    });
+  });
+
   describe('getCellPosition()', function () {
     it('should return the position a cell was added to', function () {
 
