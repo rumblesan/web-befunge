@@ -29313,11 +29313,15 @@ var create = exports.create = function create(two, config) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.clearAll = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCell = exports.addCell = exports.create = undefined;
+exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.clearAll = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCellPosition = exports.getCell = exports.addCell = exports.create = undefined;
 
 var _interpreter = require('./interpreter');
 
 var Interpreter = _interopRequireWildcard(_interpreter);
+
+var _pointer = require('./pointer');
+
+var Pointer = _interopRequireWildcard(_pointer);
 
 var _underscore = require('underscore');
 
@@ -29344,38 +29348,61 @@ var create = exports.create = function create(interpreter, grid, gridGfx, cellGf
 };
 
 var addCell = exports.addCell = function addCell(befunge, x, y, cell) {
-  befunge.interpreter.cellPositions[[x, y]] = cell;
-  befunge.interpreter.cells.set(cell, [x, y]);
+  Interpreter.addCell(befunge.interpreter, x, y, cell);
   befunge.cellGfx.add(cell.gfx);
 };
 
 var getCell = exports.getCell = function getCell(befunge, x, y) {
-  return befunge.interpreter.cellPositions[[x, y]];
+  return Interpreter.getCell(befunge.interpreter, x, y);
+};
+
+var getCellPosition = exports.getCellPosition = function getCellPosition(befunge, cell) {
+  return Interpreter.getCellPosition(befunge.interpreter, cell);
 };
 
 var startMovingCell = exports.startMovingCell = function startMovingCell(befunge, cell) {
-  var coords = befunge.interpreter.cells.get(cell);
-  befunge.interpreter.cellPositions[coords] = undefined;
-  return cell;
+  Interpreter.deleteCell(befunge.interpreter, cell);
 };
 
 var finishMovingCell = exports.finishMovingCell = function finishMovingCell(befunge, x, y, cell) {
-  befunge.interpreter.cells.set(cell, [x, y]);
-  befunge.interpreter.cellPositions[[x, y]] = cell;
+  var ec = getCell(befunge, x, y);
+  if (ec) {
+    deleteCell(befunge, ec);
+  }
+  Interpreter.addCell(befunge.interpreter, x, y, cell);
 };
 
 var deleteCell = exports.deleteCell = function deleteCell(befunge, cell) {
   cell.gfx.remove();
-  var coords = befunge.interpreter.cells.get(cell);
-  delete befunge.interpreter.cellPositions[coords];
-  delete befunge.interpreter.cells[cell];
+  Interpreter.deleteCell(befunge.interpreter, cell);
 };
 
 var clearAll = exports.clearAll = function clearAll(befunge) {
-  Interpreter.reset(befunge.interpreter);
-  _underscore2.default.each(befunge.cellGfx.children, function (c) {
-    return c.remove();
-  });
+  var cells = Interpreter.getAllCells(befunge.interpreter);
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = cells[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var cell = _step.value;
+
+      deleteCell(befunge, cell);
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
 };
 
 var getProgram = exports.getProgram = function getProgram(befunge) {
@@ -29424,19 +29451,19 @@ var updateProgram = exports.updateProgram = function updateProgram(befunge, text
 };
 
 var start = exports.start = function start(befunge) {
-  if (befunge.running === false) {
+  if (!befunge.running) {
     befunge.running = true;
-    befunge.interpreter.timer = setInterval(function () {
+    Interpreter.start(befunge.interpreter, function () {
       Interpreter.interpret(befunge);
       updatePointer(befunge);
-    }, befunge.interpreter.speed);
+    });
   }
 };
 
 var stop = exports.stop = function stop(befunge) {
   if (befunge.running) {
     befunge.running = false;
-    clearInterval(befunge.interpreter.timer);
+    Interpreter.stop(befunge.interpreter);
   }
 };
 
@@ -29444,8 +29471,8 @@ var updatePointer = exports.updatePointer = function updatePointer(befunge) {
   var interpreter = befunge.interpreter;
   var pointerGfx = befunge.pointerGfx;
   var grid = befunge.grid;
-  var pointer = interpreter.pointer;
 
+  var pointer = Interpreter.getPointer(interpreter);
   var newX = (pointer.x + 0.5) * grid.cellSize;
   var newY = (pointer.y + 0.5) * grid.cellSize;
   pointerGfx.translation.set(newX, newY);
@@ -29455,16 +29482,15 @@ var resetPointer = exports.resetPointer = function resetPointer(befunge) {
   var interpreter = befunge.interpreter;
   var pointerGfx = befunge.pointerGfx;
   var grid = befunge.grid;
-  var pointer = interpreter.pointer;
 
-  pointer.x = 0;
-  pointer.y = 0;
+  var pointer = Interpreter.getPointer(interpreter);
+  Pointer.reset(pointer);
   var newX = (pointer.x + 0.5) * grid.cellSize;
   var newY = (pointer.y + 0.5) * grid.cellSize;
   pointerGfx.translation.set(newX, newY);
 };
 
-},{"./instructions":474,"./interpreter":475,"underscore":468}],474:[function(require,module,exports){
+},{"./instructions":474,"./interpreter":475,"./pointer":477,"underscore":468}],474:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29533,7 +29559,9 @@ var getInstruction = exports.getInstruction = function getInstruction(c) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.interpret = exports.reset = exports.create = undefined;
+exports.evaluate = exports.interpret = exports.reset = exports.stop = exports.start = exports.getPointer = exports.clearStack = exports.popStack = exports.pushStack = exports.getStack = exports.deleteAllCells = exports.deleteCell = exports.getCellPosition = exports.getAllCells = exports.getCell = exports.addCell = exports.create = undefined;
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 var _befunge = require('../befunge');
 
@@ -29554,9 +29582,9 @@ var create = exports.create = function create() {
   var pointer = Pointer.create();
 
   var interpreter = {
-    cellPositions: {},
-    stack: [],
+    cellPositions: new Map(),
     cells: new Map(),
+    stack: [],
     timer: null,
     pointer: pointer,
     speed: 500,
@@ -29566,21 +29594,75 @@ var create = exports.create = function create() {
   return interpreter;
 };
 
-var push = function push(interpreter, value) {
+var addCell = exports.addCell = function addCell(interpreter, x, y, cell) {
+  interpreter.cells.set(x + ',' + y, cell);
+  interpreter.cellPositions.set(cell, [x, y]);
+};
+
+var getCell = exports.getCell = function getCell(interpreter, x, y) {
+  return interpreter.cells.get(x + ',' + y);
+};
+
+var getAllCells = exports.getAllCells = function getAllCells(interpreter) {
+  return interpreter.cells.values();
+};
+
+var getCellPosition = exports.getCellPosition = function getCellPosition(interpreter, cell) {
+  return interpreter.cellPositions.get(cell);
+};
+
+var deleteCell = exports.deleteCell = function deleteCell(interpreter, cell) {
+  // TODO check that the cell exists first
+  var _interpreter$cellPosi = interpreter.cellPositions.get(cell);
+
+  var _interpreter$cellPosi2 = _slicedToArray(_interpreter$cellPosi, 2);
+
+  var x = _interpreter$cellPosi2[0];
+  var y = _interpreter$cellPosi2[1];
+
+  interpreter.cellPositions.delete(cell);
+  interpreter.cells.delete(x + ',' + y);
+};
+
+var deleteAllCells = exports.deleteAllCells = function deleteAllCells(interpreter) {
+  interpreter.cellPositions.clear();
+  interpreter.cells.clear();
+};
+
+var getStack = exports.getStack = function getStack(interpreter) {
+  return interpreter.stack;
+};
+
+var pushStack = exports.pushStack = function pushStack(interpreter, value) {
   interpreter.stack.push(value);
 };
 
-var pop = function pop(interpreter) {
-  console.log(interpreter.stack);
+var popStack = exports.popStack = function popStack(interpreter) {
   return interpreter.stack.pop();
 };
 
-var reset = exports.reset = function reset(interpreter) {
-  interpreter.cellPositions = {};
+var clearStack = exports.clearStack = function clearStack(interpreter) {
   interpreter.stack = [];
-  interpreter.cells = new Map();
+};
+
+var getPointer = exports.getPointer = function getPointer(interpreter) {
+  return interpreter.pointer;
+};
+
+var start = exports.start = function start(interpreter, cb) {
+  var timer = setInterval(cb, interpreter.speed);
+  interpreter.timer = timer;
+};
+
+var stop = exports.stop = function stop(interpreter) {
   clearInterval(interpreter.timer);
   interpreter.timer = null;
+};
+
+var reset = exports.reset = function reset(interpreter) {
+  deleteAllCells(interpreter);
+  clearStack(interpreter);
+  stop(interpreter);
   Pointer.reset(interpreter.pointer);
   interpreter.stringMode = false;
 };
@@ -29588,17 +29670,18 @@ var reset = exports.reset = function reset(interpreter) {
 var interpret = exports.interpret = function interpret(befunge) {
   var interpreter = befunge.interpreter;
   var grid = befunge.grid;
-  var pointer = interpreter.pointer;
 
+  var pointer = getPointer(interpreter);
   var cell = Befunge.getCell(befunge, pointer.x, pointer.y);
   evaluate(befunge, cell);
   Pointer.move(pointer, grid);
 };
 
-var evaluate = function evaluate(befunge, cell) {
+var evaluate = exports.evaluate = function evaluate(befunge, cell) {
   var interpreter = befunge.interpreter;
   var terminal = befunge.terminal;
 
+  var pointer = getPointer(interpreter);
   if (cell === undefined) {
     return;
   }
@@ -29606,7 +29689,7 @@ var evaluate = function evaluate(befunge, cell) {
     if (cell.instruction.symbol === '"') {
       interpreter.stringMode = false;
     } else {
-      push(interpreter, cell.instruction.value);
+      pushStack(interpreter, cell.instruction.value);
     }
     return;
   }
@@ -29614,52 +29697,52 @@ var evaluate = function evaluate(befunge, cell) {
       v2 = void 0;
   switch (cell.instruction.instruction) {
     case '^':
-      interpreter.pointer.direction = Pointer.Directions.up;
+      Pointer.goUp(pointer);
       break;
     case '>':
-      interpreter.pointer.direction = Pointer.Directions.right;
+      Pointer.goRight(pointer);
       break;
     case 'v':
-      interpreter.pointer.direction = Pointer.Directions.down;
+      Pointer.goDown(pointer);
       break;
     case '<':
-      interpreter.pointer.direction = Pointer.Directions.left;
+      Pointer.goLeft(pointer);
       break;
 
     case '_':
-      v1 = pop(interpreter);
+      v1 = popStack(interpreter);
       if (v1 === 0) {
-        interpreter.pointer.direction = Pointer.Directions.right;
+        Pointer.goRight(pointer);
       } else {
-        interpreter.pointer.direction = Pointer.Directions.left;
+        Pointer.goLeft(pointer);
       }
       break;
     case '|':
       console.log(interpreter.stack);
-      v1 = pop(interpreter);
+      v1 = popStack(interpreter);
       console.log('v1', v1);
       if (v1 === 0) {
-        interpreter.pointer.direction = Pointer.Directions.down;
+        Pointer.goDown(pointer);
       } else {
-        interpreter.pointer.direction = Pointer.Directions.up;
+        Pointer.goUp(pointer);
       }
       break;
 
     case ':':
-      v1 = pop(interpreter);
-      push(interpreter, v1);
-      push(interpreter, v1);
+      v1 = popStack(interpreter);
+      pushStack(interpreter, v1);
+      pushStack(interpreter, v1);
       break;
     case '\\':
-      v1 = pop(interpreter);
-      v2 = pop(interpreter);
-      push(interpreter, v1);
-      push(interpreter, v2);
+      v1 = popStack(interpreter);
+      v2 = popStack(interpreter);
+      pushStack(interpreter, v1);
+      pushStack(interpreter, v2);
       break;
 
     case 'i':
       console.log('i', cell.instruction.value);
-      push(interpreter, cell.instruction.value);
+      pushStack(interpreter, cell.instruction.value);
       break;
     case '"':
       if (interpreter.stringMode) {
@@ -29669,31 +29752,31 @@ var evaluate = function evaluate(befunge, cell) {
       }
       break;
     case '+':
-      v1 = pop(interpreter);
-      v2 = pop(interpreter);
-      push(interpreter, v2 + v1);
+      v1 = popStack(interpreter);
+      v2 = popStack(interpreter);
+      pushStack(interpreter, v2 + v1);
       break;
     case '-':
-      v1 = pop(interpreter);
-      v2 = pop(interpreter);
-      push(interpreter, v2 - v1);
+      v1 = popStack(interpreter);
+      v2 = popStack(interpreter);
+      pushStack(interpreter, v2 - v1);
       break;
     case '*':
-      v1 = pop(interpreter);
-      v2 = pop(interpreter);
-      push(interpreter, v2 * v1);
+      v1 = popStack(interpreter);
+      v2 = popStack(interpreter);
+      pushStack(interpreter, v2 * v1);
       break;
     case '/':
-      v1 = pop(interpreter);
-      v2 = pop(interpreter);
-      push(interpreter, Math.floor(v2 / v1));
+      v1 = popStack(interpreter);
+      v2 = popStack(interpreter);
+      pushStack(interpreter, Math.floor(v2 / v1));
       break;
     case '.':
-      v1 = pop(interpreter);
+      v1 = popStack(interpreter);
       Terminal.print(terminal, '' + v1);
       break;
     case ',':
-      v1 = String.fromCharCode(pop(interpreter));
+      v1 = String.fromCharCode(popStack(interpreter));
       Terminal.print(terminal, '' + v1);
       break;
     case '@':
@@ -29703,7 +29786,6 @@ var evaluate = function evaluate(befunge, cell) {
     default:
       console.log('Ignoring:', cell.instruction);
   }
-  console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
 
 },{"../befunge":473,"../ui/terminal":481,"./pointer":477}],476:[function(require,module,exports){
@@ -29817,6 +29899,22 @@ var reset = exports.reset = function reset(pointer) {
   pointer.x = 0;
   pointer.y = 0;
   pointer.direction = Directions.right;
+};
+
+var goUp = exports.goUp = function goUp(pointer) {
+  pointer.direction = Directions.up;
+};
+
+var goRight = exports.goRight = function goRight(pointer) {
+  pointer.direction = Directions.right;
+};
+
+var goDown = exports.goDown = function goDown(pointer) {
+  pointer.direction = Directions.down;
+};
+
+var goLeft = exports.goLeft = function goLeft(pointer) {
+  pointer.direction = Directions.left;
 };
 
 var move = exports.move = function move(pointer, grid) {
