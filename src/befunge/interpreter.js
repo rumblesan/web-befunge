@@ -38,6 +38,7 @@ export const getCellPosition = (interpreter, cell) => {
 };
 
 export const deleteCell = (interpreter, cell) => {
+  // TODO check that the cell exists first
   const [x, y] = interpreter.cellPositions.get(cell);
   interpreter.cellPositions.delete(cell);
   interpreter.cells.delete(`${x},${y}`);
