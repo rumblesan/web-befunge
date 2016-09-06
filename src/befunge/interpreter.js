@@ -65,6 +65,10 @@ export const clearStack = (interpreter) => {
   interpreter.stack = [];
 };
 
+export const getPointer = (interpreter) => {
+  return interpreter.pointer;
+};
+
 export const start = (interpreter, cb) => {
   const timer = setInterval(cb, interpreter.speed);
   interpreter.timer = timer;
