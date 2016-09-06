@@ -13,7 +13,8 @@ export const create = () => {
     stack: [],
     timer: null,
     pointer: pointer,
-    speed: 500,
+    speeds: [500, 400, 300, 200, 100, 50, 20, 10],
+    speed: 0,
     stringMode: false
   };
 
@@ -69,13 +70,30 @@ export const getPointer = (interpreter) => {
   return interpreter.pointer;
 };
 
+export const speedUp = (interpreter) => {
+  const speed = interpreter.speed;
+  if (speed + 1 < interpreter.speeds.length) {
+    interpreter.speed += 1;
+  }
+};
+
+export const slowDown = (interpreter) => {
+  const speed = interpreter.speed;
+  if (speed - 1 < 0) {
+    interpreter.speed -= 1;
+  }
+};
+
 export const start = (interpreter, cb) => {
-  const timer = setInterval(cb, interpreter.speed);
+  const timer = setTimeout(() => {
+    cb();
+    start(interpreter, cb);
+  }, interpreter.speeds[interpreter.speed]);
   interpreter.timer = timer;
 };
 
 export const stop = (interpreter) => {
-  clearInterval(interpreter.timer);
+  clearTimeout(interpreter.timer);
   interpreter.timer = null;
 };
 

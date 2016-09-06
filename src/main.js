@@ -187,6 +187,8 @@ const cellConstructor = (two, befunge) => {
         }
       }
       updateprogram={(text) => Befunge.updateProgram(befunge, text, newCell)}
+      speedUp={() => {Interpreter.speedUp(interpreter);}}
+      slowDown={() => {Interpreter.slowDown(interpreter);}}
       befunge={befunge}
       running={true} />,
     document.getElementById('header'),

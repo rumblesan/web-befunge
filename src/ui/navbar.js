@@ -47,6 +47,8 @@ export default React.createClass({
             <span onClick={this.toggleRunning} className='control-item'>{this.state.running ? 'Stop' : 'Start'}</span>
             <span onClick={this.reset} className='control-item'>Restart</span>
             <span onClick={this.programtext} className='control-item'>Program Text</span>
+            <span onClick={this.props.speedUp} className='control-item'>Speed Up</span>
+            <span onClick={this.props.slowDown} className='control-item'>Slow Down</span>
         </div>
         {this.state.showtext ? <ProgramText text={Befunge.getProgram(this.props.befunge)} close={this.programtext} update={this.updatetext} /> : <div></div>}
       </div>
