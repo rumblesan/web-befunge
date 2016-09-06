@@ -89,7 +89,7 @@ export const reset = (interpreter) => {
 
 export const interpret = (befunge) => {
   const {interpreter, grid} = befunge;
-  const {pointer} = interpreter;
+  const pointer = getPointer(interpreter);
   const cell = Befunge.getCell(befunge, pointer.x, pointer.y);
   evaluate(befunge, cell);
   Pointer.move(pointer, grid);
@@ -97,6 +97,7 @@ export const interpret = (befunge) => {
 
 export const evaluate = (befunge, cell) => {
   const {interpreter, terminal} = befunge;
+  const pointer = getPointer(interpreter);
   if (cell === undefined) {
     return;
   }
@@ -111,24 +112,24 @@ export const evaluate = (befunge, cell) => {
   let v1, v2;
   switch (cell.instruction.instruction) {
   case '^':
-    interpreter.pointer.direction = Pointer.Directions.up;
+    Pointer.goUp(pointer);
     break;
   case '>':
-    interpreter.pointer.direction = Pointer.Directions.right;
+    Pointer.goRight(pointer);
     break;
   case 'v':
-    interpreter.pointer.direction = Pointer.Directions.down;
+    Pointer.goDown(pointer);
     break;
   case '<':
-    interpreter.pointer.direction = Pointer.Directions.left;
+    Pointer.goLeft(pointer);
     break;
 
   case '_':
     v1 = popStack(interpreter);
     if (v1 === 0) {
-      interpreter.pointer.direction = Pointer.Directions.right;
+      Pointer.goRight(pointer);
     } else {
-      interpreter.pointer.direction = Pointer.Directions.left;
+      Pointer.goLeft(pointer);
     }
     break;
   case '|':
@@ -136,9 +137,9 @@ export const evaluate = (befunge, cell) => {
     v1 = popStack(interpreter);
     console.log('v1', v1);
     if (v1 === 0) {
-      interpreter.pointer.direction = Pointer.Directions.down;
+      Pointer.goDown(pointer);
     } else {
-      interpreter.pointer.direction = Pointer.Directions.up;
+      Pointer.goUp(pointer);
     }
     break;
 
