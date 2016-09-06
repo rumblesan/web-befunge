@@ -201,5 +201,4 @@ export const evaluate = (befunge, cell) => {
   default:
     console.log('Ignoring:', cell.instruction);
   }
-  console.log('tick', cell.instruction, [interpreter.pointer.x, interpreter.pointer.y]);
 };
