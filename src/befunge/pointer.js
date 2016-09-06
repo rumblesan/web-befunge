@@ -24,6 +24,22 @@ export const reset = (pointer) => {
   pointer.direction = Directions.right;
 };
 
+export const goUp = (pointer) => {
+  pointer.direction = Directions.up;
+};
+
+export const goRight = (pointer) => {
+  pointer.direction = Directions.right;
+};
+
+export const goDown = (pointer) => {
+  pointer.direction = Directions.down;
+};
+
+export const goLeft = (pointer) => {
+  pointer.direction = Directions.left;
+};
+
 export const move = (pointer, grid) => {
   switch (pointer.direction) {
   case Directions.up:
