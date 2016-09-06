@@ -8,9 +8,9 @@ export const create = () => {
   const pointer = Pointer.create();
 
   const interpreter = {
-    cellPositions: {},
-    stack: [],
+    cellPositions: new Map(),
     cells: new Map(),
+    stack: [],
     timer: null,
     pointer: pointer,
     speed: 500,
@@ -20,21 +20,60 @@ export const create = () => {
   return interpreter;
 };
 
-const push = (interpreter, value) => {
+export const addCell = (interpreter, x, y, cell) => {
+  interpreter.cells.set(`${x},${y}`, cell);
+  interpreter.cellPositions.set(cell, [x, y]);
+};
+
+export const getCell = (interpreter, x, y) => {
+  return interpreter.cells.get(`${x},${y}`);
+};
+
+export const getCellPosition = (interpreter, cell) => {
+  return interpreter.cellPositions.get(cell);
+};
+
+export const deleteCell = (interpreter, cell) => {
+  const [x, y] = interpreter.cellPositions.get(cell);
+  interpreter.cellPositions.delete(cell);
+  interpreter.cells.delete(`${x},${y}`);
+};
+
+export const deleteAllCells = (interpreter) => {
+  interpreter.cellPositions.clear();
+  interpreter.cells.clear();
+};
+
+export const getStack = (interpreter) => {
+  return interpreter.stack;
+};
+
+export const pushStack = (interpreter, value) => {
   interpreter.stack.push(value);
 };
 
-const pop = (interpreter) => {
-  console.log(interpreter.stack);
+export const popStack = (interpreter) => {
   return interpreter.stack.pop();
 };
 
-export const reset = (interpreter) => {
-  interpreter.cellPositions = {};
+export const clearStack = (interpreter) => {
   interpreter.stack = [];
-  interpreter.cells = new Map();
+};
+
+export const start = (interpreter, cb) => {
+  const timer = setInterval(cb, interpreter.speed);
+  interpreter.timer = timer;
+};
+
+export const stop = (interpreter) => {
   clearInterval(interpreter.timer);
   interpreter.timer = null;
+};
+
+export const reset = (interpreter) => {
+  deleteAllCells(interpreter);
+  clearStack(interpreter);
+  stop(interpreter);
   Pointer.reset(interpreter.pointer);
   interpreter.stringMode = false;
 };
@@ -47,7 +86,7 @@ export const interpret = (befunge) => {
   Pointer.move(pointer, grid);
 };
 
-const evaluate = (befunge, cell) => {
+export const evaluate = (befunge, cell) => {
   const {interpreter, terminal} = befunge;
   if (cell === undefined) {
     return;
@@ -56,7 +95,7 @@ const evaluate = (befunge, cell) => {
     if (cell.instruction.symbol === '"') {
       interpreter.stringMode = false;
     } else {
-      push(interpreter, cell.instruction.value);
+      pushStack(interpreter, cell.instruction.value);
     }
     return;
   }
@@ -76,7 +115,7 @@ const evaluate = (befunge, cell) => {
     break;
 
   case '_':
-    v1 = pop(interpreter);
+    v1 = popStack(interpreter);
     if (v1 === 0) {
       interpreter.pointer.direction = Pointer.Directions.right;
     } else {
@@ -85,7 +124,7 @@ const evaluate = (befunge, cell) => {
     break;
   case '|':
     console.log(interpreter.stack);
-    v1 = pop(interpreter);
+    v1 = popStack(interpreter);
     console.log('v1', v1);
     if (v1 === 0) {
       interpreter.pointer.direction = Pointer.Directions.down;
@@ -95,20 +134,20 @@ const evaluate = (befunge, cell) => {
     break;
 
   case ':':
-    v1 = pop(interpreter);
-    push(interpreter, v1);
-    push(interpreter, v1);
+    v1 = popStack(interpreter);
+    pushStack(interpreter, v1);
+    pushStack(interpreter, v1);
     break;
   case '\\':
-    v1 = pop(interpreter);
-    v2 = pop(interpreter);
-    push(interpreter, v1);
-    push(interpreter, v2);
+    v1 = popStack(interpreter);
+    v2 = popStack(interpreter);
+    pushStack(interpreter, v1);
+    pushStack(interpreter, v2);
     break;
 
   case 'i':
     console.log('i', cell.instruction.value);
-    push(interpreter, cell.instruction.value);
+    pushStack(interpreter, cell.instruction.value);
     break;
   case '"':
     if (interpreter.stringMode) {
@@ -118,31 +157,31 @@ const evaluate = (befunge, cell) => {
     }
     break;
   case '+':
-    v1 = pop(interpreter);
-    v2 = pop(interpreter);
-    push(interpreter, v2 + v1);
+    v1 = popStack(interpreter);
+    v2 = popStack(interpreter);
+    pushStack(interpreter, v2 + v1);
     break;
   case '-':
-    v1 = pop(interpreter);
-    v2 = pop(interpreter);
-    push(interpreter, v2 - v1);
+    v1 = popStack(interpreter);
+    v2 = popStack(interpreter);
+    pushStack(interpreter, v2 - v1);
     break;
   case '*':
-    v1 = pop(interpreter);
-    v2 = pop(interpreter);
-    push(interpreter, v2 * v1);
+    v1 = popStack(interpreter);
+    v2 = popStack(interpreter);
+    pushStack(interpreter, v2 * v1);
     break;
   case '/':
-    v1 = pop(interpreter);
-    v2 = pop(interpreter);
-    push(interpreter, Math.floor(v2 / v1));
+    v1 = popStack(interpreter);
+    v2 = popStack(interpreter);
+    pushStack(interpreter, Math.floor(v2 / v1));
     break;
   case '.':
-    v1 = pop(interpreter);
+    v1 = popStack(interpreter);
     Terminal.print(terminal, `${v1}`);
     break;
   case ',':
-    v1 = String.fromCharCode(pop(interpreter));
+    v1 = String.fromCharCode(popStack(interpreter));
     Terminal.print(terminal, `${v1}`);
     break;
   case '@':
