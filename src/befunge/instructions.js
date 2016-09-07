@@ -4,22 +4,39 @@ const inst = (c) => {
 };
 
 export const charInstructions = {
-  '^': inst('^'),
-  '>': inst('>'),
-  'v': inst('v'),
-  '<': inst('<'),
-  '_': inst('_'),
-  '|': inst('|'),
-  '@': inst('@'),
   '+': inst('+'),
   '-': inst('-'),
   '*': inst('*'),
   '/': inst('/'),
+  '%': inst('%'),
+
+  '!': inst('!'),
+  '`': inst('`'),
+  '_': inst('_'),
+  '|': inst('|'),
+  '#': inst('#'),
+
+  '>': inst('>'),
+  '<': inst('<'),
+  '^': inst('^'),
+  'v': inst('v'),
+  '?': inst('?'),
+
+
+
   ':': inst(':'),
   '\\': inst('\\'),
-  '"': inst('"'),
+  '$': inst('$'),
   '.': inst('.'),
-  ',': inst(',')
+  ',': inst(','),
+
+  '"': inst('"'),
+  'p': inst('p'),
+  'g': inst('g'),
+  '&': inst('&'),
+  '~': inst('~'),
+
+  '@': inst('@')
 };
 
 const isIntRe = /^[0-9]$/;

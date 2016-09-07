@@ -127,56 +127,71 @@ export const evaluate = (befunge, cell) => {
     }
     return;
   }
-  let v1, v2;
+  let a, b, x, y, v, c;
   switch (cell.instruction.instruction) {
-  case '^':
-    Pointer.goUp(pointer);
+  case 'i':
+    pushStack(interpreter, cell.instruction.value);
+    break;
+
+  case '+':
+    a = popStack(interpreter);
+    b = popStack(interpreter);
+    pushStack(interpreter, a + b);
+    break;
+  case '-':
+    a = popStack(interpreter);
+    b = popStack(interpreter);
+    pushStack(interpreter, b - a);
+    break;
+  case '*':
+    a = popStack(interpreter);
+    b = popStack(interpreter);
+    pushStack(interpreter, a * b);
+    break;
+  case '/':
+    a = popStack(interpreter);
+    b = popStack(interpreter);
+    pushStack(interpreter, Math.floor(b / a));
+    break;
+  case '%':
+    a = popStack(interpreter);
+    b = popStack(interpreter);
+    pushStack(interpreter, Math.floor(b % a));
+    break;
+
+  case '<':
+    Pointer.goLeft(pointer);
     break;
   case '>':
     Pointer.goRight(pointer);
     break;
+  case '^':
+    Pointer.goUp(pointer);
+    break;
   case 'v':
     Pointer.goDown(pointer);
     break;
-  case '<':
-    Pointer.goLeft(pointer);
+  case '?':
+    Pointer.goRandom(pointer);
     break;
 
   case '_':
-    v1 = popStack(interpreter);
-    if (v1 === 0) {
+    a = popStack(interpreter);
+    if (a === 0) {
       Pointer.goRight(pointer);
     } else {
       Pointer.goLeft(pointer);
     }
     break;
   case '|':
-    console.log(interpreter.stack);
-    v1 = popStack(interpreter);
-    console.log('v1', v1);
-    if (v1 === 0) {
+    a = popStack(interpreter);
+    if (a === 0) {
       Pointer.goDown(pointer);
     } else {
       Pointer.goUp(pointer);
     }
     break;
 
-  case ':':
-    v1 = popStack(interpreter);
-    pushStack(interpreter, v1);
-    pushStack(interpreter, v1);
-    break;
-  case '\\':
-    v1 = popStack(interpreter);
-    v2 = popStack(interpreter);
-    pushStack(interpreter, v1);
-    pushStack(interpreter, v2);
-    break;
-
-  case 'i':
-    console.log('i', cell.instruction.value);
-    pushStack(interpreter, cell.instruction.value);
-    break;
   case '"':
     if (interpreter.stringMode) {
       interpreter.stringMode = false;
@@ -184,34 +199,50 @@ export const evaluate = (befunge, cell) => {
       interpreter.stringMode = true;
     }
     break;
-  case '+':
-    v1 = popStack(interpreter);
-    v2 = popStack(interpreter);
-    pushStack(interpreter, v2 + v1);
+
+  case ':':
+    a = popStack(interpreter);
+    pushStack(interpreter, a);
+    pushStack(interpreter, a);
     break;
-  case '-':
-    v1 = popStack(interpreter);
-    v2 = popStack(interpreter);
-    pushStack(interpreter, v2 - v1);
+  case '\\':
+    a = popStack(interpreter);
+    b = popStack(interpreter);
+    pushStack(interpreter, a);
+    pushStack(interpreter, b);
     break;
-  case '*':
-    v1 = popStack(interpreter);
-    v2 = popStack(interpreter);
-    pushStack(interpreter, v2 * v1);
+
+  case '$':
+    popStack(interpreter);
     break;
-  case '/':
-    v1 = popStack(interpreter);
-    v2 = popStack(interpreter);
-    pushStack(interpreter, Math.floor(v2 / v1));
-    break;
+
   case '.':
-    v1 = popStack(interpreter);
-    Terminal.print(terminal, `${v1}`);
+    a = popStack(interpreter);
+    Terminal.print(terminal, `${a}`);
     break;
   case ',':
-    v1 = String.fromCharCode(popStack(interpreter));
-    Terminal.print(terminal, `${v1}`);
+    a = String.fromCharCode(popStack(interpreter));
+    Terminal.print(terminal, `${a}`);
     break;
+
+  case '#':
+    Pointer.jump(pointer);
+    break;
+
+  case 'p':
+    y = popStack(interpreter);
+    x = popStack(interpreter);
+    v = popStack(interpreter);
+    // TODO
+    break;
+  case 'g':
+    y = popStack(interpreter);
+    x = popStack(interpreter);
+    c = getCell(interpreter, x, y);
+    console.log(x, y, c);
+    pushStack(interpreter, c.instruction.value);
+    break;
+
   case '@':
     clearInterval(interpreter.timer);
     console.log('Terminated');

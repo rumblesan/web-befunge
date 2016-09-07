@@ -29502,22 +29502,37 @@ var inst = function inst(c) {
 };
 
 var charInstructions = exports.charInstructions = {
-  '^': inst('^'),
-  '>': inst('>'),
-  'v': inst('v'),
-  '<': inst('<'),
-  '_': inst('_'),
-  '|': inst('|'),
-  '@': inst('@'),
   '+': inst('+'),
   '-': inst('-'),
   '*': inst('*'),
   '/': inst('/'),
+  '%': inst('%'),
+
+  '!': inst('!'),
+  '`': inst('`'),
+  '_': inst('_'),
+  '|': inst('|'),
+  '#': inst('#'),
+
+  '>': inst('>'),
+  '<': inst('<'),
+  '^': inst('^'),
+  'v': inst('v'),
+  '?': inst('?'),
+
   ':': inst(':'),
   '\\': inst('\\'),
-  '"': inst('"'),
+  '$': inst('$'),
   '.': inst('.'),
-  ',': inst(',')
+  ',': inst(','),
+
+  '"': inst('"'),
+  'p': inst('p'),
+  'g': inst('g'),
+  '&': inst('&'),
+  '~': inst('~'),
+
+  '@': inst('@')
 };
 
 var isIntRe = /^[0-9]$/;
@@ -29559,7 +29574,7 @@ var getInstruction = exports.getInstruction = function getInstruction(c) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.evaluate = exports.interpret = exports.reset = exports.stop = exports.start = exports.getPointer = exports.clearStack = exports.popStack = exports.pushStack = exports.getStack = exports.deleteAllCells = exports.deleteCell = exports.getCellPosition = exports.getAllCells = exports.getCell = exports.addCell = exports.create = undefined;
+exports.evaluate = exports.interpret = exports.reset = exports.stop = exports.start = exports.slowDown = exports.speedUp = exports.getPointer = exports.clearStack = exports.popStack = exports.pushStack = exports.getStack = exports.deleteAllCells = exports.deleteCell = exports.getCellPosition = exports.getAllCells = exports.getCell = exports.addCell = exports.create = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -29587,7 +29602,8 @@ var create = exports.create = function create() {
     stack: [],
     timer: null,
     pointer: pointer,
-    speed: 500,
+    speeds: [500, 400, 300, 200, 100, 50, 20, 10],
+    speed: 0,
     stringMode: false
   };
 
@@ -29649,13 +29665,30 @@ var getPointer = exports.getPointer = function getPointer(interpreter) {
   return interpreter.pointer;
 };
 
+var speedUp = exports.speedUp = function speedUp(interpreter) {
+  var speed = interpreter.speed;
+  if (speed + 1 < interpreter.speeds.length) {
+    interpreter.speed += 1;
+  }
+};
+
+var slowDown = exports.slowDown = function slowDown(interpreter) {
+  var speed = interpreter.speed;
+  if (speed - 1 < 0) {
+    interpreter.speed -= 1;
+  }
+};
+
 var start = exports.start = function start(interpreter, cb) {
-  var timer = setInterval(cb, interpreter.speed);
+  var timer = setTimeout(function () {
+    cb();
+    start(interpreter, cb);
+  }, interpreter.speeds[interpreter.speed]);
   interpreter.timer = timer;
 };
 
 var stop = exports.stop = function stop(interpreter) {
-  clearInterval(interpreter.timer);
+  clearTimeout(interpreter.timer);
   interpreter.timer = null;
 };
 
@@ -29693,57 +29726,76 @@ var evaluate = exports.evaluate = function evaluate(befunge, cell) {
     }
     return;
   }
-  var v1 = void 0,
-      v2 = void 0;
+  var a = void 0,
+      b = void 0,
+      x = void 0,
+      y = void 0,
+      v = void 0,
+      c = void 0;
   switch (cell.instruction.instruction) {
-    case '^':
-      Pointer.goUp(pointer);
+    case 'i':
+      pushStack(interpreter, cell.instruction.value);
+      break;
+
+    case '+':
+      a = popStack(interpreter);
+      b = popStack(interpreter);
+      pushStack(interpreter, a + b);
+      break;
+    case '-':
+      a = popStack(interpreter);
+      b = popStack(interpreter);
+      pushStack(interpreter, b - a);
+      break;
+    case '*':
+      a = popStack(interpreter);
+      b = popStack(interpreter);
+      pushStack(interpreter, a * b);
+      break;
+    case '/':
+      a = popStack(interpreter);
+      b = popStack(interpreter);
+      pushStack(interpreter, Math.floor(b / a));
+      break;
+    case '%':
+      a = popStack(interpreter);
+      b = popStack(interpreter);
+      pushStack(interpreter, Math.floor(b % a));
+      break;
+
+    case '<':
+      Pointer.goLeft(pointer);
       break;
     case '>':
       Pointer.goRight(pointer);
       break;
+    case '^':
+      Pointer.goUp(pointer);
+      break;
     case 'v':
       Pointer.goDown(pointer);
       break;
-    case '<':
-      Pointer.goLeft(pointer);
+    case '?':
+      Pointer.goRandom(pointer);
       break;
 
     case '_':
-      v1 = popStack(interpreter);
-      if (v1 === 0) {
+      a = popStack(interpreter);
+      if (a === 0) {
         Pointer.goRight(pointer);
       } else {
         Pointer.goLeft(pointer);
       }
       break;
     case '|':
-      console.log(interpreter.stack);
-      v1 = popStack(interpreter);
-      console.log('v1', v1);
-      if (v1 === 0) {
+      a = popStack(interpreter);
+      if (a === 0) {
         Pointer.goDown(pointer);
       } else {
         Pointer.goUp(pointer);
       }
       break;
 
-    case ':':
-      v1 = popStack(interpreter);
-      pushStack(interpreter, v1);
-      pushStack(interpreter, v1);
-      break;
-    case '\\':
-      v1 = popStack(interpreter);
-      v2 = popStack(interpreter);
-      pushStack(interpreter, v1);
-      pushStack(interpreter, v2);
-      break;
-
-    case 'i':
-      console.log('i', cell.instruction.value);
-      pushStack(interpreter, cell.instruction.value);
-      break;
     case '"':
       if (interpreter.stringMode) {
         interpreter.stringMode = false;
@@ -29751,34 +29803,50 @@ var evaluate = exports.evaluate = function evaluate(befunge, cell) {
         interpreter.stringMode = true;
       }
       break;
-    case '+':
-      v1 = popStack(interpreter);
-      v2 = popStack(interpreter);
-      pushStack(interpreter, v2 + v1);
+
+    case ':':
+      a = popStack(interpreter);
+      pushStack(interpreter, a);
+      pushStack(interpreter, a);
       break;
-    case '-':
-      v1 = popStack(interpreter);
-      v2 = popStack(interpreter);
-      pushStack(interpreter, v2 - v1);
+    case '\\':
+      a = popStack(interpreter);
+      b = popStack(interpreter);
+      pushStack(interpreter, a);
+      pushStack(interpreter, b);
       break;
-    case '*':
-      v1 = popStack(interpreter);
-      v2 = popStack(interpreter);
-      pushStack(interpreter, v2 * v1);
+
+    case '$':
+      popStack(interpreter);
       break;
-    case '/':
-      v1 = popStack(interpreter);
-      v2 = popStack(interpreter);
-      pushStack(interpreter, Math.floor(v2 / v1));
-      break;
+
     case '.':
-      v1 = popStack(interpreter);
-      Terminal.print(terminal, '' + v1);
+      a = popStack(interpreter);
+      Terminal.print(terminal, '' + a);
       break;
     case ',':
-      v1 = String.fromCharCode(popStack(interpreter));
-      Terminal.print(terminal, '' + v1);
+      a = String.fromCharCode(popStack(interpreter));
+      Terminal.print(terminal, '' + a);
       break;
+
+    case '#':
+      Pointer.jump(pointer);
+      break;
+
+    case 'p':
+      y = popStack(interpreter);
+      x = popStack(interpreter);
+      v = popStack(interpreter);
+      // TODO
+      break;
+    case 'g':
+      y = popStack(interpreter);
+      x = popStack(interpreter);
+      c = getCell(interpreter, x, y);
+      console.log(x, y, c);
+      pushStack(interpreter, c.instruction.value);
+      break;
+
     case '@':
       clearInterval(interpreter.timer);
       console.log('Terminated');
@@ -29889,7 +29957,8 @@ var create = exports.create = function create() {
   var pointer = {
     x: 0,
     y: 0,
-    direction: Directions.right
+    direction: Directions.right,
+    jump: false
   };
 
   return pointer;
@@ -29915,6 +29984,28 @@ var goDown = exports.goDown = function goDown(pointer) {
 
 var goLeft = exports.goLeft = function goLeft(pointer) {
   pointer.direction = Directions.left;
+};
+
+var jump = exports.jump = function jump(pointer) {
+  pointer.jump = true;
+};
+
+var goRandom = exports.goRandom = function goRandom(pointer) {
+  var r = Math.floor(Math.random() * 4);
+  switch (r) {
+    case 0:
+      pointer.direction = Directions.up;
+      break;
+    case 1:
+      pointer.direction = Directions.down;
+      break;
+    case 2:
+      pointer.direction = Directions.left;
+      break;
+    case 3:
+      pointer.direction = Directions.right;
+      break;
+  }
 };
 
 var move = exports.move = function move(pointer, grid) {
@@ -29945,6 +30036,10 @@ var move = exports.move = function move(pointer, grid) {
       break;
     default:
       console.log('Should never get to here');
+  }
+  if (pointer.jump) {
+    pointer.jump = false;
+    move(pointer, grid);
   }
 };
 
@@ -30050,6 +30145,16 @@ exports.default = _react2.default.createClass({
           'span',
           { onClick: this.programtext, className: 'control-item' },
           'Program Text'
+        ),
+        _react2.default.createElement(
+          'span',
+          { onClick: this.props.speedUp, className: 'control-item' },
+          'Speed Up'
+        ),
+        _react2.default.createElement(
+          'span',
+          { onClick: this.props.slowDown, className: 'control-item' },
+          'Slow Down'
         )
       ),
       this.state.showtext ? _react2.default.createElement(_programText2.default, { text: Befunge.getProgram(this.props.befunge), close: this.programtext, update: this.updatetext }) : _react2.default.createElement('div', null)
@@ -30409,6 +30514,12 @@ var cellConstructor = function cellConstructor(two, befunge) {
     },
     updateprogram: function updateprogram(text) {
       return Befunge.updateProgram(befunge, text, newCell);
+    },
+    speedUp: function speedUp() {
+      Interpreter.speedUp(interpreter);
+    },
+    slowDown: function slowDown() {
+      Interpreter.slowDown(interpreter);
     },
     befunge: befunge,
     running: true }), document.getElementById('header'));
