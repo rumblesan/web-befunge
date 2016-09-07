@@ -11,7 +11,8 @@ export const create = () => {
   const pointer = {
     x: 0,
     y: 0,
-    direction: Directions.right
+    direction: Directions.right,
+    jump: false
   };
 
   return pointer;
@@ -38,6 +39,28 @@ export const goDown = (pointer) => {
 
 export const goLeft = (pointer) => {
   pointer.direction = Directions.left;
+};
+
+export const jump = (pointer) => {
+  pointer.jump = true;
+};
+
+export const goRandom = (pointer) => {
+  const r = Math.floor(Math.random() * 4);
+  switch (r) {
+  case 0:
+    pointer.direction = Directions.up;
+    break;
+  case 1:
+    pointer.direction = Directions.down;
+    break;
+  case 2:
+    pointer.direction = Directions.left;
+    break;
+  case 3:
+    pointer.direction = Directions.right;
+    break;
+  }
 };
 
 export const move = (pointer, grid) => {
@@ -68,5 +91,9 @@ export const move = (pointer, grid) => {
     break;
   default:
     console.log('Should never get to here');
+  }
+  if (pointer.jump) {
+    pointer.jump = false;
+    move(pointer, grid);
   }
 };
