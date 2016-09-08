@@ -13,7 +13,7 @@ export const create = () => {
     stack: [],
     timer: null,
     pointer: pointer,
-    speeds: [500, 400, 300, 200, 100, 50, 20, 10],
+    speeds: [500, 400, 300, 200, 100, 50, 20, 10, 5, 2],
     speed: 0,
     stringMode: false
   };
