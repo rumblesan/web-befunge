@@ -1,5 +1,7 @@
 
 import * as Befunge from '../befunge';
+import * as Instructions from './instructions';
+import * as Grid from './grid';
 import * as Pointer from './pointer';
 import * as Terminal from '../ui/terminal';
 
@@ -159,6 +161,24 @@ export const evaluate = (befunge, cell) => {
     pushStack(interpreter, Math.floor(b % a));
     break;
 
+  case '!':
+    a = popStack(interpreter);
+    if (a === 0) {
+      pushStack(interpreter, 1);
+    } else {
+      pushStack(interpreter, 0);
+    }
+    break;
+  case '`':
+    a = popStack(interpreter);
+    b = popStack(interpreter);
+    if (b > a) {
+      pushStack(interpreter, 1);
+    } else {
+      pushStack(interpreter, 0);
+    }
+    break;
+
   case '<':
     Pointer.goLeft(pointer);
     break;
@@ -218,7 +238,7 @@ export const evaluate = (befunge, cell) => {
 
   case '.':
     a = popStack(interpreter);
-    Terminal.print(terminal, `${a}`);
+    Terminal.print(terminal, `${a} `);
     break;
   case ',':
     a = String.fromCharCode(popStack(interpreter));
@@ -233,7 +253,11 @@ export const evaluate = (befunge, cell) => {
     y = popStack(interpreter);
     x = popStack(interpreter);
     v = popStack(interpreter);
-    // TODO
+    Befunge.newCell(
+      befunge,
+      Instructions.getInstruction(String.fromCharCode(v)),
+      Grid.getCoordsForCell(befunge.grid, x, y)
+    );
     break;
   case 'g':
     y = popStack(interpreter);
