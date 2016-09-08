@@ -37,8 +37,8 @@ const cellStyle = {
   fill: '#FF8000',
   stroke: 'orangered',
   linewidth: 5,
-  textSize: gridConfig.cellSize * 0.9,
-  cellSize: gridConfig.cellSize
+  textSize: gridConfig.cellSize * 0.7,
+  cellSize: gridConfig.cellSize * 0.8
 };
 const pointerStyle = {
   noFill: true,
