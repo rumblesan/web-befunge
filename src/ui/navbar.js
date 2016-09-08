@@ -43,12 +43,12 @@ export default React.createClass({
     return (
       <div>
         <div>
-            <span className='control-item'>Befunge</span>
-            <span onClick={this.toggleRunning} className='control-item'>{this.state.running ? 'Stop' : 'Start'}</span>
-            <span onClick={this.reset} className='control-item'>Restart</span>
-            <span onClick={this.programtext} className='control-item'>Program Text</span>
-            <span onClick={this.props.speedUp} className='control-item'>Speed Up</span>
-            <span onClick={this.props.slowDown} className='control-item'>Slow Down</span>
+            <a href="#" className='control-item'>Befunge</a>
+            <a href="#" onClick={this.toggleRunning} className='control-item'>{this.state.running ? 'Stop' : 'Start'}</a>
+            <a href="#" onClick={this.reset} className='control-item'>Restart</a>
+            <a href="#" onClick={this.programtext} className='control-item'>Program Text</a>
+            <a href="#" onClick={this.props.speedUp} className='control-item'>Speed Up</a>
+            <a href="#" onClick={this.props.slowDown} className='control-item'>Slow Down</a>
         </div>
         {this.state.showtext ? <ProgramText text={Befunge.getProgram(this.props.befunge)} close={this.programtext} update={this.updatetext} /> : <div></div>}
       </div>

@@ -30260,33 +30260,33 @@ exports.default = _react2.default.createClass({
         'div',
         null,
         _react2.default.createElement(
-          'span',
-          { className: 'control-item' },
+          'a',
+          { href: '#', className: 'control-item' },
           'Befunge'
         ),
         _react2.default.createElement(
-          'span',
-          { onClick: this.toggleRunning, className: 'control-item' },
+          'a',
+          { href: '#', onClick: this.toggleRunning, className: 'control-item' },
           this.state.running ? 'Stop' : 'Start'
         ),
         _react2.default.createElement(
-          'span',
-          { onClick: this.reset, className: 'control-item' },
+          'a',
+          { href: '#', onClick: this.reset, className: 'control-item' },
           'Restart'
         ),
         _react2.default.createElement(
-          'span',
-          { onClick: this.programtext, className: 'control-item' },
+          'a',
+          { href: '#', onClick: this.programtext, className: 'control-item' },
           'Program Text'
         ),
         _react2.default.createElement(
-          'span',
-          { onClick: this.props.speedUp, className: 'control-item' },
+          'a',
+          { href: '#', onClick: this.props.speedUp, className: 'control-item' },
           'Speed Up'
         ),
         _react2.default.createElement(
-          'span',
-          { onClick: this.props.slowDown, className: 'control-item' },
+          'a',
+          { href: '#', onClick: this.props.slowDown, className: 'control-item' },
           'Slow Down'
         )
       ),

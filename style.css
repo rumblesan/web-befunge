@@ -29,7 +29,9 @@ body {
     font-family: monospace; line-height: 1.4em;
     font-size: 1.2em;
 }
-.control-item {
+a.control-item {
+    text-decoration: none;
+    color: white;
     padding: 2px 10px;
 }
 button {
