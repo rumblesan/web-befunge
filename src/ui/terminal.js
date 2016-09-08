@@ -52,13 +52,17 @@ export const render = (element) => {
 };
 
 export const print = (terminal, c) => {
-  const active = terminal.component.state.activeLine;
-  terminal.component.setState({activeLine: active + c});
+  if (c === '\n') {
+    newline(terminal);
+  } else {
+    const active = terminal.component.state.activeLine;
+    terminal.component.setState({activeLine: active + c});
+  }
 };
 
 export const newline = (terminal) => {
   const lines = terminal.component.state.lines;
   const active = terminal.component.state.activeLine;
   lines.push(active);
-  terminal.component.setState({lines: lines, active: ''});
+  terminal.component.setState({lines: lines, activeLine: ''});
 };

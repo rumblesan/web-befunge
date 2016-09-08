@@ -30422,15 +30422,19 @@ var render = exports.render = function render(element) {
 };
 
 var print = exports.print = function print(terminal, c) {
-  var active = terminal.component.state.activeLine;
-  terminal.component.setState({ activeLine: active + c });
+  if (c === '\n') {
+    newline(terminal);
+  } else {
+    var active = terminal.component.state.activeLine;
+    terminal.component.setState({ activeLine: active + c });
+  }
 };
 
 var newline = exports.newline = function newline(terminal) {
   var lines = terminal.component.state.lines;
   var active = terminal.component.state.activeLine;
   lines.push(active);
-  terminal.component.setState({ lines: lines, active: '' });
+  terminal.component.setState({ lines: lines, activeLine: '' });
 };
 
 },{"react":467,"react-dom":298,"underscore":468}],482:[function(require,module,exports){
