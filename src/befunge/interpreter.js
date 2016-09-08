@@ -264,15 +264,14 @@ export const evaluate = (befunge, cell) => {
     y = popStack(interpreter);
     x = popStack(interpreter);
     c = getCell(interpreter, x, y);
-    console.log(x, y, c);
     pushStack(interpreter, c.instruction.value);
     break;
 
   case '@':
-    console.log('Terminated');
     stop(interpreter);
+    Terminal.heading(terminal, 'Program terminated');
     break;
   default:
-    console.log('Ignoring:', cell.instruction);
+    Terminal.error(terminal, `Unknown instruction: ${cell.instruction.symbol}`);
   }
 };

@@ -8,7 +8,8 @@ export const ReactTerminal = React.createClass({
   getInitialState: function () {
     return {
       lines: [],
-      activeLine: ''
+      activeLine: '',
+      messages: []
     };
   },
 
@@ -24,10 +25,25 @@ export const ReactTerminal = React.createClass({
           </div>
         </div>
 
-        <div id="terminal-body">
+        <div id="terminal-stdout">
           {
-            _.map(this.state.lines, (line) => {
-              return <p><msg>{'>> '}</msg>{line}<br /></p>;
+            _.map(this.state.lines, (line, idx) => {
+              return <p key={`line-${idx}`}><msg>{'>> '}</msg>{line}<br /></p>;
+            })
+          }
+          {<p><msg>{'>> '}</msg>{this.state.activeLine}<br /></p>}
+        </div>
+        <div id="terminal-messages">
+          {
+            _.map(this.state.messages, (message, idx) => {
+              switch (message.type) {
+              case 'error':
+                return <p key={`msg-${idx}`}><err>{'>> '}</err>{message.text}<br /></p>;
+              case 'heading':
+                return <p key={`msg-${idx}`}><heading>{'>> '}</heading>{message.text}<br /></p>;
+              default:
+                return <p key={`msg-${idx}`}><msg>{'>> '}</msg>{message.text}<br /></p>;
+              }
             })
           }
           {<p><msg>{'>> '}</msg>{this.state.activeLine}<br /></p>}
@@ -65,4 +81,25 @@ export const newline = (terminal) => {
   const active = terminal.component.state.activeLine;
   lines.push(active);
   terminal.component.setState({lines: lines, activeLine: ''});
+};
+
+const msg = (terminal, type, text) => {
+  const messages = terminal.component.state.messages;
+  const message = {
+    type: type, text: text
+  };
+  messages.push(message);
+  terminal.component.setState({messages: messages});
+};
+
+export const message = (terminal, text) => {
+  msg(terminal, 'message', text);
+};
+
+export const error = (terminal, text) => {
+  msg(terminal, 'error', text);
+};
+
+export const heading = (terminal, text) => {
+  msg(terminal, 'heading', text);
 };

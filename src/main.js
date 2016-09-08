@@ -114,18 +114,25 @@ const addGridInteractivity = (two, befunge) => {
 
   ReactDOM.render(
     <NavBar
-      startStop={() => { befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);}}
-      reset={
-        () => {
-          if (befunge.running) {
-            Befunge.stop(befunge);
-          }
-          Befunge.resetPointer(befunge);
-        }
-      }
-      updateprogram={(text) => Befunge.updateProgram(befunge, text, cellConstructor)}
-      speedUp={() => {Interpreter.speedUp(interpreter);}}
-      slowDown={() => {Interpreter.slowDown(interpreter);}}
+      startStop={() => {
+        befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);
+      }}
+      reset={() => {
+        Terminal.message(terminal, 'Resetting');
+        Befunge.reset(befunge);
+      }}
+      updateprogram={(text) => {
+        Terminal.message(terminal, 'Loading new program');
+        Befunge.updateProgram(befunge, text, cellConstructor);
+      }}
+      speedUp={() => {
+        Terminal.message(terminal, 'Speed up');
+        Interpreter.speedUp(interpreter);
+      }}
+      slowDown={() => {
+        Terminal.message(terminal, 'Slow down');
+        Interpreter.slowDown(interpreter);
+      }}
       befunge={befunge}
       running={befunge.running} />,
     document.getElementById('header'),

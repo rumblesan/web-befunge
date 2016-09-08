@@ -75,13 +75,13 @@ svg text {
 }
 
 
-/*--TERMINAL BODY--*/
-#terminal-body {
+/*--TERMINAL STDOUT--*/
+#terminal-stdout {
   height: 175px;
   font-family: monospace; line-height: 1em;
   font-size: 11px;
   float: left;
-  width: 100%;
+  width: 50%;
   min-height: 30px;
   background-color: #000;
   padding: 10px;
@@ -90,7 +90,26 @@ svg text {
 }
 
 
-#terminal-body p {
+#terminal-stdout p {
+    color: gray!important;
+}
+
+/*--TERMINAL STDERR--*/
+#terminal-messages {
+  height: 175px;
+  font-family: monospace; line-height: 1em;
+  font-size: 11px;
+  float: left;
+  width: 50%;
+  min-height: 30px;
+  background-color: #000;
+  padding: 10px;
+  line-height: 1.5em;
+  overflow-y: auto;
+}
+
+
+#terminal-messages p {
     color: gray!important;
 }
 

@@ -29306,7 +29306,7 @@ var create = exports.create = function create(two, config) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.resetPointer = exports.updatePointer = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.clearAll = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCellPosition = exports.getCell = exports.newCell = exports.create = undefined;
+exports.reset = exports.updatePointer = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.clearAll = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCellPosition = exports.getCell = exports.newCell = exports.create = undefined;
 
 var _interpreter = require('./interpreter');
 
@@ -29533,7 +29533,9 @@ var updatePointer = exports.updatePointer = function updatePointer(befunge) {
   pointerGfx.translation.set(newX, newY);
 };
 
-var resetPointer = exports.resetPointer = function resetPointer(befunge) {
+var reset = exports.reset = function reset(befunge) {
+  stop(befunge);
+  befunge.stack = [];
   var interpreter = befunge.interpreter;
   var pointerGfx = befunge.pointerGfx;
   var grid = befunge.grid;
@@ -29755,8 +29757,8 @@ var slowDown = exports.slowDown = function slowDown(interpreter) {
 
 var start = exports.start = function start(interpreter, cb) {
   var timer = setTimeout(function () {
-    cb();
     start(interpreter, cb);
+    cb();
   }, interpreter.speeds[interpreter.speed]);
   interpreter.timer = timer;
 };
@@ -29935,16 +29937,15 @@ var evaluate = exports.evaluate = function evaluate(befunge, cell) {
       y = popStack(interpreter);
       x = popStack(interpreter);
       c = getCell(interpreter, x, y);
-      console.log(x, y, c);
       pushStack(interpreter, c.instruction.value);
       break;
 
     case '@':
-      clearInterval(interpreter.timer);
-      console.log('Terminated');
+      stop(interpreter);
+      Terminal.heading(terminal, 'Program terminated');
       break;
     default:
-      console.log('Ignoring:', cell.instruction);
+      Terminal.error(terminal, 'Unknown instruction: ' + cell.instruction.symbol);
   }
 };
 
@@ -30340,7 +30341,7 @@ exports.default = _react2.default.createClass({
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.newline = exports.print = exports.render = exports.create = exports.ReactTerminal = undefined;
+exports.heading = exports.error = exports.message = exports.newline = exports.print = exports.render = exports.create = exports.ReactTerminal = undefined;
 
 var _react = require('react');
 
@@ -30362,7 +30363,8 @@ var ReactTerminal = exports.ReactTerminal = _react2.default.createClass({
   getInitialState: function getInitialState() {
     return {
       lines: [],
-      activeLine: ''
+      activeLine: '',
+      messages: []
     };
   },
 
@@ -30381,11 +30383,11 @@ var ReactTerminal = exports.ReactTerminal = _react2.default.createClass({
       ),
       _react2.default.createElement(
         'div',
-        { id: 'terminal-body' },
-        _underscore2.default.map(this.state.lines, function (line) {
+        { id: 'terminal-stdout' },
+        _underscore2.default.map(this.state.lines, function (line, idx) {
           return _react2.default.createElement(
             'p',
-            null,
+            { key: 'line-' + idx },
             _react2.default.createElement(
               'msg',
               null,
@@ -30394,6 +30396,61 @@ var ReactTerminal = exports.ReactTerminal = _react2.default.createClass({
             line,
             _react2.default.createElement('br', null)
           );
+        }),
+        _react2.default.createElement(
+          'p',
+          null,
+          _react2.default.createElement(
+            'msg',
+            null,
+            '>> '
+          ),
+          this.state.activeLine,
+          _react2.default.createElement('br', null)
+        )
+      ),
+      _react2.default.createElement(
+        'div',
+        { id: 'terminal-messages' },
+        _underscore2.default.map(this.state.messages, function (message, idx) {
+          switch (message.type) {
+            case 'error':
+              return _react2.default.createElement(
+                'p',
+                { key: 'msg-' + idx },
+                _react2.default.createElement(
+                  'err',
+                  null,
+                  '>> '
+                ),
+                message.text,
+                _react2.default.createElement('br', null)
+              );
+            case 'heading':
+              return _react2.default.createElement(
+                'p',
+                { key: 'msg-' + idx },
+                _react2.default.createElement(
+                  'heading',
+                  null,
+                  '>> '
+                ),
+                message.text,
+                _react2.default.createElement('br', null)
+              );
+            default:
+              return _react2.default.createElement(
+                'p',
+                { key: 'msg-' + idx },
+                _react2.default.createElement(
+                  'msg',
+                  null,
+                  '>> '
+                ),
+                message.text,
+                _react2.default.createElement('br', null)
+              );
+          }
         }),
         _react2.default.createElement(
           'p',
@@ -30435,6 +30492,27 @@ var newline = exports.newline = function newline(terminal) {
   var active = terminal.component.state.activeLine;
   lines.push(active);
   terminal.component.setState({ lines: lines, activeLine: '' });
+};
+
+var msg = function msg(terminal, type, text) {
+  var messages = terminal.component.state.messages;
+  var message = {
+    type: type, text: text
+  };
+  messages.push(message);
+  terminal.component.setState({ messages: messages });
+};
+
+var message = exports.message = function message(terminal, text) {
+  msg(terminal, 'message', text);
+};
+
+var error = exports.error = function error(terminal, text) {
+  msg(terminal, 'error', text);
+};
+
+var heading = exports.heading = function heading(terminal, text) {
+  msg(terminal, 'heading', text);
 };
 
 },{"react":467,"react-dom":298,"underscore":468}],482:[function(require,module,exports){
@@ -30587,18 +30665,19 @@ var addGridInteractivity = function addGridInteractivity(two, befunge) {
       befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);
     },
     reset: function reset() {
-      if (befunge.running) {
-        Befunge.stop(befunge);
-      }
-      Befunge.resetPointer(befunge);
+      Terminal.message(terminal, 'Resetting');
+      Befunge.reset(befunge);
     },
     updateprogram: function updateprogram(text) {
-      return Befunge.updateProgram(befunge, text, cellConstructor);
+      Terminal.message(terminal, 'Loading new program');
+      Befunge.updateProgram(befunge, text, cellConstructor);
     },
     speedUp: function speedUp() {
+      Terminal.message(terminal, 'Speed up');
       Interpreter.speedUp(interpreter);
     },
     slowDown: function slowDown() {
+      Terminal.message(terminal, 'Slow down');
       Interpreter.slowDown(interpreter);
     },
     befunge: befunge,

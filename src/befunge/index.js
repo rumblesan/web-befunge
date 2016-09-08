@@ -181,7 +181,9 @@ export const updatePointer = (befunge) => {
   pointerGfx.translation.set(newX, newY);
 };
 
-export const resetPointer = (befunge) => {
+export const reset = (befunge) => {
+  stop(befunge);
+  befunge.stack = [];
   const {interpreter, pointerGfx, grid} = befunge;
   const pointer = Interpreter.getPointer(interpreter);
   Pointer.reset(pointer);
