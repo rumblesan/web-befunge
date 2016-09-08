@@ -3,8 +3,9 @@
 import * as Instructions from './instructions';
 import _ from 'underscore';
 
-export const cellCreationMenu = (two, coords, cellConstructor, menuConfig) => {
+export const cellCreationMenu = (befunge, coords, menuConfig) => {
 
+  const {two} = befunge;
   const instructions = _.values(Instructions.charInstructions);
   const {buttonColumns, buttonWidth, buttonHeight} = menuConfig;
   const rows = Math.ceil(instructions.length / buttonColumns);

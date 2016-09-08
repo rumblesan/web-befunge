@@ -2,8 +2,9 @@
 
 import _ from 'underscore';
 
-export const cellModificationMenu = (two, coords, config, editMenuConstructor, buttonDestructor) => {
+export const cellModificationMenu = (befunge, coords, config, editMenuConstructor, buttonDestructor) => {
 
+  const {two} = befunge;
   const {buttonWidth, buttonHeight} = config;
   const menuWidth = buttonWidth;
   const menuHeight = 2 * buttonHeight;

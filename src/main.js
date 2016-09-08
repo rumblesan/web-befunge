@@ -171,7 +171,7 @@ const cellConstructor = (two, befunge) => {
   );
 
   const interpreter = Interpreter.create();
-  const befunge = Befunge.create(interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
+  const befunge = Befunge.create(two, interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
 
   const newCell = cellConstructor(two, befunge);
 

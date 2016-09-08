@@ -5,8 +5,9 @@ import _ from 'underscore';
 
 import * as Instructions from './instructions';
 
-export const create = (interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal) => {
+export const create = (two, interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal) => {
   return {
+    two: two,
     interpreter: interpreter,
     grid: grid,
     gridGfx: gridGfx,
