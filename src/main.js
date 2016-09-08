@@ -117,6 +117,12 @@ const addGridInteractivity = (two, befunge) => {
       startStop={() => {
         befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);
       }}
+      step={() => {
+        if (befunge.running) {
+          Befunge.stop(befunge);
+        }
+        Befunge.step(befunge);
+      }}
       reset={() => {
         Terminal.message(terminal, 'Resetting');
         Befunge.reset(befunge);

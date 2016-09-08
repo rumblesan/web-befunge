@@ -29306,7 +29306,7 @@ var create = exports.create = function create(two, config) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.reset = exports.updatePointer = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.clearAll = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCellPosition = exports.getCell = exports.newCell = exports.create = undefined;
+exports.reset = exports.updatePointer = exports.step = exports.stop = exports.start = exports.updateProgram = exports.getProgram = exports.clearAll = exports.deleteCell = exports.finishMovingCell = exports.startMovingCell = exports.getCellPosition = exports.getCell = exports.newCell = exports.create = undefined;
 
 var _interpreter = require('./interpreter');
 
@@ -29520,6 +29520,11 @@ var stop = exports.stop = function stop(befunge) {
     befunge.running = false;
     Interpreter.stop(befunge.interpreter);
   }
+};
+
+var step = exports.step = function step(befunge) {
+  Interpreter.interpret(befunge);
+  updatePointer(befunge);
 };
 
 var updatePointer = exports.updatePointer = function updatePointer(befunge) {
@@ -30235,6 +30240,12 @@ exports.default = _react2.default.createClass({
     }, this.props.startStop);
   },
 
+  step: function step() {
+    this.setState({
+      running: false
+    }, this.props.step);
+  },
+
   reset: function reset() {
     this.setState({
       running: false
@@ -30269,6 +30280,11 @@ exports.default = _react2.default.createClass({
           'a',
           { href: '#', onClick: this.toggleRunning, className: 'control-item' },
           this.state.running ? 'Stop' : 'Start'
+        ),
+        _react2.default.createElement(
+          'a',
+          { href: '#', onClick: this.step, className: 'control-item' },
+          'Step'
         ),
         _react2.default.createElement(
           'a',
@@ -30663,6 +30679,12 @@ var addGridInteractivity = function addGridInteractivity(two, befunge) {
   _reactDom2.default.render(_react2.default.createElement(_navbar2.default, {
     startStop: function startStop() {
       befunge.running ? Befunge.stop(befunge) : Befunge.start(befunge);
+    },
+    step: function step() {
+      if (befunge.running) {
+        Befunge.stop(befunge);
+      }
+      Befunge.step(befunge);
     },
     reset: function reset() {
       Terminal.message(terminal, 'Resetting');

@@ -20,6 +20,12 @@ export default React.createClass({
     }, this.props.startStop);
   },
 
+  step: function () {
+    this.setState({
+      running: false
+    }, this.props.step);
+  },
+
   reset: function () {
     this.setState({
       running: false
@@ -45,6 +51,7 @@ export default React.createClass({
         <div>
             <a href="#" className='control-item'>Befunge</a>
             <a href="#" onClick={this.toggleRunning} className='control-item'>{this.state.running ? 'Stop' : 'Start'}</a>
+            <a href="#" onClick={this.step} className='control-item'>Step</a>
             <a href="#" onClick={this.reset} className='control-item'>Restart</a>
             <a href="#" onClick={this.programtext} className='control-item'>Program Text</a>
             <a href="#" onClick={this.props.speedUp} className='control-item'>Speed Up</a>

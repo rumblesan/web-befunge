@@ -173,6 +173,11 @@ export const stop = (befunge) => {
   }
 };
 
+export const step = (befunge) => {
+  Interpreter.interpret(befunge);
+  updatePointer(befunge);
+};
+
 export const updatePointer = (befunge) => {
   const {interpreter, pointerGfx, grid} = befunge;
   const pointer = Interpreter.getPointer(interpreter);
