@@ -147,7 +147,7 @@ export const updateProgram = (befunge, text, cellConstructor) => {
       }
       instruction = Instructions.getInstruction(c);
       if (instruction) {
-        cellConstructor(instruction, {x: x, y: y});
+        cellConstructor(instruction, Grid.getCoordsForCell(befunge.grid, x, y));
       }
     }
   }
