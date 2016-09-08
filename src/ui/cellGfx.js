@@ -24,10 +24,7 @@ export const newCellGfx = (cellGfx, instruction, coords) => {
   cellRect.linewidth = style.linewidth;
 
   gfx.add(cellRect, text);
-  gfx.translation.set(
-    (coords.x + 0.5) * style.cellSize,
-    (coords.y + 0.5) * style.cellSize
-  );
+  gfx.translation.set(coords.cX, coords.cY);
   two.update();
   return gfx;
 };
