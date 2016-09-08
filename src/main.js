@@ -121,11 +121,9 @@ const addGridInteractivity = (two, befunge) => {
       speedUp={() => {Interpreter.speedUp(interpreter);}}
       slowDown={() => {Interpreter.slowDown(interpreter);}}
       befunge={befunge}
-      running={true} />,
+      running={befunge.running} />,
     document.getElementById('header'),
   );
-
-  Befunge.start(befunge);
 
   two.update();
 
