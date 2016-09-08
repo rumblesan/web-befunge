@@ -6,17 +6,16 @@ import * as Befunge from './befunge';
 
 import * as Grid    from './befunge/grid';
 import * as GridGFX from './befunge/gridGfx';
-import * as Cell    from './befunge/cell';
 import * as Interpreter from './befunge/interpreter';
 import * as PointerGFX  from './befunge/pointerGfx';
 import * as Terminal  from './ui/terminal';
+import * as CellGfx  from './ui/cellGfx';
 import NavBar  from './ui/navbar';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import {cellCreationMenu} from './befunge/creationMenu';
-import {cellModificationMenu} from './befunge/modificationMenu';
 
 const gridConfig = {
   xCells: 80,
@@ -34,16 +33,12 @@ const menuConfig = {
   buttonColumns: 5,
   linewidth: 2
 };
-const editMenuConfig = {
-  buttonWidth: 100,
-  buttonHeight: 50,
-  lineWidth: 2
-};
 const cellStyle = {
   fill: '#FF8000',
   stroke: 'orangered',
   linewidth: 5,
-  textSize: gridConfig.cellSize * 0.9
+  textSize: gridConfig.cellSize * 0.9,
+  cellSize: gridConfig.cellSize
 };
 const pointerStyle = {
   noFill: true,
@@ -51,38 +46,18 @@ const pointerStyle = {
   linewidth: 5
 };
 
-const displayCellEditMenu = (two, befunge, cell) => {
+const displayCellCreationMenu = (befunge) => {
   return (e) => {
     e.preventDefault();
-    const coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
-    let menu = cellModificationMenu(
-      two, coords, editMenuConfig,
-      () => {console.log('edit');},
-      () => {Befunge.deleteCell(befunge, cell);}
-    );
-    menu.svg.translation.set(
-        (coords.x + 0.5) * befunge.grid.cellSize,
-        (coords.y + 0.5) * befunge.grid.cellSize
-    );
-    two.update();
-  };
-};
-
-const displayCellCreationMenu = (two, befunge) => {
-  return (e) => {
-    e.preventDefault();
-    const coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
-    let menu = cellCreationMenu(two, coords, cellConstructor(two, befunge), menuConfig);
-    menu.svg.translation.set(
-        (coords.x + 0.5) * befunge.grid.cellSize,
-        (coords.y + 0.5) * befunge.grid.cellSize
-    );
-    two.update();
+    const coords = Grid.getCoordinates(befunge.grid, befunge.two.scene, e.clientX, e.clientY);
+    const menu = cellCreationMenu(befunge, coords, menuConfig);
+    menu.svg.translation.set(coords.cX, coords.cY);
+    befunge.two.update();
   };
 };
 
 const addGridInteractivity = (two, befunge) => {
-  befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayCellCreationMenu(two, befunge) );
+  befunge.gridGfx._renderer.elem.addEventListener('dblclick', displayCellCreationMenu(befunge) );
 
   befunge.gridGfx._renderer.elem.addEventListener('mousedown', function (e) {
     e.preventDefault();
@@ -107,52 +82,6 @@ const addGridInteractivity = (two, befunge) => {
   });
 };
 
-const addCellInteractivity = (two, befunge, cell) => {
-
-  cell.gfx._renderer.elem.addEventListener('dblclick', displayCellEditMenu(two, befunge, cell));
-
-  cell.gfx._renderer.elem.addEventListener('mousedown', function (e) {
-
-    e.preventDefault();
-
-    const xOffset = two.scene.translation.x;
-    const yOffset = two.scene.translation.y;
-
-    Befunge.startMovingCell(befunge, cell);
-
-    var drag = function (e) {
-      e.preventDefault();
-      cell.gfx.translation.set(e.clientX - xOffset, e.clientY - yOffset);
-    };
-
-    var dragEnd = function (e) {
-      e.preventDefault();
-
-      const coords = Grid.getCoordinates(befunge.grid, two.scene, e.clientX, e.clientY);
-      const newX = ((coords.x + 0.5) * befunge.grid.cellSize);
-      const newY = ((coords.y + 0.5) * befunge.grid.cellSize);
-
-      cell.gfx.translation.set(newX, newY);
-      Befunge.finishMovingCell(befunge, coords.x, coords.y, cell);
-      window.removeEventListener('mousemove', drag);
-      window.removeEventListener('mouseup', dragEnd);
-    };
-
-    window.addEventListener('mousemove', drag);
-    window.addEventListener('mouseup', dragEnd);
-  });
-};
-
-const cellConstructor = (two, befunge) => {
-  return (instruction, coords) => {
-    console.log('new instruction', instruction);
-    const newCell = Cell.create(two, befunge.grid, coords.x, coords.y, instruction, cellStyle);
-    Befunge.addCell(befunge, coords.x, coords.y, newCell);
-    two.update();
-    addCellInteractivity(two, befunge, newCell);
-  };
-};
-
 (function () {
   const two = new Two({
     type: Two.Types['svg'],
@@ -162,7 +91,7 @@ const cellConstructor = (two, befunge) => {
 
   const grid = Grid.create(gridConfig);
   const gridGfx = GridGFX.create(two, gridConfig);
-  const cellGfx = two.makeGroup();
+  const cellGfx = CellGfx.create(two, cellStyle);
   const pointerGfx = PointerGFX.create(two, gridConfig, pointerStyle);
 
 
@@ -173,7 +102,9 @@ const cellConstructor = (two, befunge) => {
   const interpreter = Interpreter.create();
   const befunge = Befunge.create(two, interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
 
-  const newCell = cellConstructor(two, befunge);
+  const cellConstructor = (instruction, coords) => {
+    Befunge.newCell(befunge, instruction, coords);
+  };
 
   ReactDOM.render(
     <NavBar
@@ -186,7 +117,7 @@ const cellConstructor = (two, befunge) => {
           Befunge.resetPointer(befunge);
         }
       }
-      updateprogram={(text) => Befunge.updateProgram(befunge, text, newCell)}
+      updateprogram={(text) => Befunge.updateProgram(befunge, text, cellConstructor)}
       speedUp={() => {Interpreter.speedUp(interpreter);}}
       slowDown={() => {Interpreter.slowDown(interpreter);}}
       befunge={befunge}

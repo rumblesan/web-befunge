@@ -1,5 +1,6 @@
 /* global Two: false */
 
+import * as Befunge from '../befunge';
 import * as Instructions from './instructions';
 import _ from 'underscore';
 
@@ -27,9 +28,9 @@ export const cellCreationMenu = (befunge, coords, menuConfig) => {
 
   for (let x = 0; x < buttonColumns; x += 1) {
     for (let y = 0; y < rows; y += 1) {
-      let inst = instructions[(y * buttonColumns) + x];
-      if (inst) {
-        let buttonGfx = CellCreateButtonGfx(two, inst.symbol, menuConfig);
+      let instruction = instructions[(y * buttonColumns) + x];
+      if (instruction) {
+        let buttonGfx = CellCreateButtonGfx(two, instruction.symbol, menuConfig);
         buttonGfx.translation.set(
           (x * buttonWidth) - xOffset,
           (y * buttonHeight) - yOffset
@@ -37,7 +38,7 @@ export const cellCreationMenu = (befunge, coords, menuConfig) => {
         menu.svg.add(buttonGfx);
         menu.buttons.push({
           svg: buttonGfx,
-          click: ()=> cellConstructor(inst, coords)
+          click: ()=> Befunge.newCell(befunge, instruction, coords)
         });
       }
     }
@@ -48,7 +49,7 @@ export const cellCreationMenu = (befunge, coords, menuConfig) => {
   charInput.click = (c) => {
     const inst = Instructions.getInstruction(c);
     if (inst) {
-      cellConstructor(inst, coords);
+      Befunge.newCell(befunge, inst, coords);
     }
   };
   menu.svg.add(charInput.svg);
