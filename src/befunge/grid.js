@@ -26,3 +26,11 @@ export const getCoordinates = (grid, scene, xPos, yPos) => {
     x: nearestX, y: nearestY, xPos: xPos, yPos: yPos, cX: cX, cY: cY
   };
 };
+
+export const getCoordsForCell = (grid, xGrid, yGrid) => {
+  const cX = (xGrid + 0.5) * grid.cellSize;
+  const cY = (yGrid + 0.5) * grid.cellSize;
+  return {
+    x: xGrid, y: yGrid, cX: cX, cY: cY
+  };
+};
