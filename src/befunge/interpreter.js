@@ -79,7 +79,7 @@ export const speedUp = (interpreter) => {
 
 export const slowDown = (interpreter) => {
   const speed = interpreter.speed;
-  if (speed - 1 < 0) {
+  if (speed - 1 > 0) {
     interpreter.speed -= 1;
   }
 };
