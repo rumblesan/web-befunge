@@ -48,6 +48,9 @@ const charInst = (c) => {
 const intInst = (i) => {
   return {symbol: i, instruction: 'i', value: parseInt(i, 10)};
 };
+const dataInst = (i) => {
+  return {symbol: 'D', instruction: i, value: i};
+};
 
 export const isValid = (c) => {
   return (charInstructions[c] !== undefined || isCharRe.test(c) || isIntRe.test(c));
@@ -61,6 +64,10 @@ export const isChar = (c) => {
   return isCharRe.test(c);
 };
 
+export const isBlank = (c) => {
+  return (c === ' ');
+};
+
 export const getInstruction = (c) => {
   if (charInstructions[c]) {
     return charInstructions[c];
@@ -68,6 +75,10 @@ export const getInstruction = (c) => {
     return charInst(c);
   } else if (isInt(c)) {
     return intInst(c);
+  } else if (isBlank(c)) {
+    return null;
+  } else {
+    return dataInst(c);
   }
   return null;
 };
