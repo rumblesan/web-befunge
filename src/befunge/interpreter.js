@@ -88,8 +88,8 @@ export const slowDown = (interpreter) => {
 
 export const start = (interpreter, cb) => {
   const timer = setTimeout(() => {
-    cb();
     start(interpreter, cb);
+    cb();
   }, interpreter.speeds[interpreter.speed]);
   interpreter.timer = timer;
 };
@@ -269,8 +269,8 @@ export const evaluate = (befunge, cell) => {
     break;
 
   case '@':
-    clearInterval(interpreter.timer);
     console.log('Terminated');
+    stop(interpreter);
     break;
   default:
     console.log('Ignoring:', cell.instruction);
