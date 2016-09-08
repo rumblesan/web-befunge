@@ -256,7 +256,8 @@ export const evaluate = (befunge, cell) => {
     Befunge.newCell(
       befunge,
       Instructions.getInstruction(String.fromCharCode(v)),
-      Grid.getCoordsForCell(befunge.grid, x, y)
+      Grid.getCoordsForCell(befunge.grid, x, y),
+      true
     );
     break;
   case 'g':

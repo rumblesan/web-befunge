@@ -24,8 +24,8 @@ export const create = (two, interpreter, grid, gridGfx, cellGfx, pointerGfx, ter
   };
 };
 
-export const newCell = (befunge, instruction, coords) => {
-  const gfx = CellGfx.newCellGfx(befunge.cellGfx, instruction, coords);
+export const newCell = (befunge, instruction, coords, modified) => {
+  const gfx = CellGfx.newCellGfx(befunge.cellGfx, instruction, coords, modified);
   const cell = {
     instruction: instruction,
     gfx: gfx

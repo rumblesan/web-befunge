@@ -34,8 +34,14 @@ const menuConfig = {
   linewidth: 2
 };
 const cellStyle = {
-  fill: '#FF8000',
-  stroke: 'orangered',
+  normal: {
+    fill: '#FF8000',
+    stroke: 'orangered',
+  },
+  modified: {
+    fill: 'red',
+    stroke: 'orangered',
+  },
   linewidth: 5,
   textSize: gridConfig.cellSize * 0.7,
   cellSize: gridConfig.cellSize * 0.8
@@ -103,7 +109,7 @@ const addGridInteractivity = (two, befunge) => {
   const befunge = Befunge.create(two, interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
 
   const cellConstructor = (instruction, coords) => {
-    Befunge.newCell(befunge, instruction, coords);
+    Befunge.newCell(befunge, instruction, coords, false);
   };
 
   ReactDOM.render(

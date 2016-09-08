@@ -38,7 +38,7 @@ export const cellCreationMenu = (befunge, coords, menuConfig) => {
         menu.svg.add(buttonGfx);
         menu.buttons.push({
           svg: buttonGfx,
-          click: ()=> Befunge.newCell(befunge, instruction, coords)
+          click: ()=> Befunge.newCell(befunge, instruction, coords, false)
         });
       }
     }
@@ -49,7 +49,7 @@ export const cellCreationMenu = (befunge, coords, menuConfig) => {
   charInput.click = (c) => {
     const inst = Instructions.getInstruction(c);
     if (inst) {
-      Befunge.newCell(befunge, inst, coords);
+      Befunge.newCell(befunge, inst, coords, false);
     }
   };
   menu.svg.add(charInput.svg);

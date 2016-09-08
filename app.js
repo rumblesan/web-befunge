@@ -29129,7 +29129,7 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(befu
         menu.buttons.push({
           svg: buttonGfx,
           click: function click() {
-            return Befunge.newCell(befunge, instruction, coords);
+            return Befunge.newCell(befunge, instruction, coords, false);
           }
         });
       }
@@ -29145,7 +29145,7 @@ var cellCreationMenu = exports.cellCreationMenu = function cellCreationMenu(befu
   charInput.click = function (c) {
     var inst = Instructions.getInstruction(c);
     if (inst) {
-      Befunge.newCell(befunge, inst, coords);
+      Befunge.newCell(befunge, inst, coords, false);
     }
   };
   menu.svg.add(charInput.svg);
@@ -29253,6 +29253,14 @@ var getCoordinates = exports.getCoordinates = function getCoordinates(grid, scen
   };
 };
 
+var getCoordsForCell = exports.getCoordsForCell = function getCoordsForCell(grid, xGrid, yGrid) {
+  var cX = (xGrid + 0.5) * grid.cellSize;
+  var cY = (yGrid + 0.5) * grid.cellSize;
+  return {
+    x: xGrid, y: yGrid, cX: cX, cY: cY
+  };
+};
+
 },{}],471:[function(require,module,exports){
 "use strict";
 
@@ -29343,8 +29351,8 @@ var create = exports.create = function create(two, interpreter, grid, gridGfx, c
   };
 };
 
-var newCell = exports.newCell = function newCell(befunge, instruction, coords) {
-  var gfx = CellGfx.newCellGfx(befunge.cellGfx, instruction, coords);
+var newCell = exports.newCell = function newCell(befunge, instruction, coords, modified) {
+  var gfx = CellGfx.newCellGfx(befunge.cellGfx, instruction, coords, modified);
   var cell = {
     instruction: instruction,
     gfx: gfx
@@ -29491,7 +29499,7 @@ var updateProgram = exports.updateProgram = function updateProgram(befunge, text
       }
       instruction = Instructions.getInstruction(c);
       if (instruction) {
-        cellConstructor(instruction, { x: x, y: y });
+        cellConstructor(instruction, Grid.getCoordsForCell(befunge.grid, x, y));
       }
     }
   }
@@ -29591,6 +29599,9 @@ var charInst = function charInst(c) {
 var intInst = function intInst(i) {
   return { symbol: i, instruction: 'i', value: parseInt(i, 10) };
 };
+var dataInst = function dataInst(i) {
+  return { symbol: 'D', instruction: i, value: i };
+};
 
 var isValid = exports.isValid = function isValid(c) {
   return charInstructions[c] !== undefined || isCharRe.test(c) || isIntRe.test(c);
@@ -29604,6 +29615,10 @@ var isChar = exports.isChar = function isChar(c) {
   return isCharRe.test(c);
 };
 
+var isBlank = exports.isBlank = function isBlank(c) {
+  return c === ' ';
+};
+
 var getInstruction = exports.getInstruction = function getInstruction(c) {
   if (charInstructions[c]) {
     return charInstructions[c];
@@ -29611,6 +29626,10 @@ var getInstruction = exports.getInstruction = function getInstruction(c) {
     return charInst(c);
   } else if (isInt(c)) {
     return intInst(c);
+  } else if (isBlank(c)) {
+    return null;
+  } else {
+    return dataInst(c);
   }
   return null;
 };
@@ -29628,6 +29647,14 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 var _befunge = require('../befunge');
 
 var Befunge = _interopRequireWildcard(_befunge);
+
+var _instructions = require('./instructions');
+
+var Instructions = _interopRequireWildcard(_instructions);
+
+var _grid = require('./grid');
+
+var Grid = _interopRequireWildcard(_grid);
 
 var _pointer = require('./pointer');
 
@@ -29649,7 +29676,7 @@ var create = exports.create = function create() {
     stack: [],
     timer: null,
     pointer: pointer,
-    speeds: [500, 400, 300, 200, 100, 50, 20, 10],
+    speeds: [500, 400, 300, 200, 100, 50, 20, 10, 5, 2],
     speed: 0,
     stringMode: false
   };
@@ -29721,7 +29748,7 @@ var speedUp = exports.speedUp = function speedUp(interpreter) {
 
 var slowDown = exports.slowDown = function slowDown(interpreter) {
   var speed = interpreter.speed;
-  if (speed - 1 < 0) {
+  if (speed - 1 > 0) {
     interpreter.speed -= 1;
   }
 };
@@ -29810,6 +29837,24 @@ var evaluate = exports.evaluate = function evaluate(befunge, cell) {
       pushStack(interpreter, Math.floor(b % a));
       break;
 
+    case '!':
+      a = popStack(interpreter);
+      if (a === 0) {
+        pushStack(interpreter, 1);
+      } else {
+        pushStack(interpreter, 0);
+      }
+      break;
+    case '`':
+      a = popStack(interpreter);
+      b = popStack(interpreter);
+      if (b > a) {
+        pushStack(interpreter, 1);
+      } else {
+        pushStack(interpreter, 0);
+      }
+      break;
+
     case '<':
       Pointer.goLeft(pointer);
       break;
@@ -29869,7 +29914,7 @@ var evaluate = exports.evaluate = function evaluate(befunge, cell) {
 
     case '.':
       a = popStack(interpreter);
-      Terminal.print(terminal, '' + a);
+      Terminal.print(terminal, a + ' ');
       break;
     case ',':
       a = String.fromCharCode(popStack(interpreter));
@@ -29884,7 +29929,7 @@ var evaluate = exports.evaluate = function evaluate(befunge, cell) {
       y = popStack(interpreter);
       x = popStack(interpreter);
       v = popStack(interpreter);
-      // TODO
+      Befunge.newCell(befunge, Instructions.getInstruction(String.fromCharCode(v)), Grid.getCoordsForCell(befunge.grid, x, y), true);
       break;
     case 'g':
       y = popStack(interpreter);
@@ -29903,7 +29948,7 @@ var evaluate = exports.evaluate = function evaluate(befunge, cell) {
   }
 };
 
-},{"../befunge":472,"../ui/terminal":481,"./pointer":476}],475:[function(require,module,exports){
+},{"../befunge":472,"../ui/terminal":481,"./grid":470,"./instructions":473,"./pointer":476}],475:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -30123,7 +30168,7 @@ var create = exports.create = function create(two, style) {
   };
 };
 
-var newCellGfx = exports.newCellGfx = function newCellGfx(cellGfx, instruction, coords) {
+var newCellGfx = exports.newCellGfx = function newCellGfx(cellGfx, instruction, coords, modified) {
   var two = cellGfx.two;
   var style = cellGfx.style;
 
@@ -30131,12 +30176,17 @@ var newCellGfx = exports.newCellGfx = function newCellGfx(cellGfx, instruction, 
   var text = new Two.Text(instruction.symbol, 0, 0);
   text.size = style.textSize;
   var cellRect = two.makeRectangle(0, 0, style.cellSize, style.cellSize);
-  cellRect.fill = style.fill;
-  cellRect.stroke = style.stroke;
+  if (modified) {
+    cellRect.fill = style.modified.fill;
+    cellRect.stroke = style.modified.stroke;
+  } else {
+    cellRect.fill = style.normal.fill;
+    cellRect.stroke = style.normal.stroke;
+  }
   cellRect.linewidth = style.linewidth;
 
   gfx.add(cellRect, text);
-  gfx.translation.set((coords.x + 0.5) * style.cellSize, (coords.y + 0.5) * style.cellSize);
+  gfx.translation.set(coords.cX, coords.cY);
   two.update();
   return gfx;
 };
@@ -30453,11 +30503,17 @@ var menuConfig = {
   linewidth: 2
 };
 var cellStyle = {
-  fill: '#FF8000',
-  stroke: 'orangered',
+  normal: {
+    fill: '#FF8000',
+    stroke: 'orangered'
+  },
+  modified: {
+    fill: 'red',
+    stroke: 'orangered'
+  },
   linewidth: 5,
-  textSize: gridConfig.cellSize * 0.9,
-  cellSize: gridConfig.cellSize
+  textSize: gridConfig.cellSize * 0.7,
+  cellSize: gridConfig.cellSize * 0.8
 };
 var pointerStyle = {
   noFill: true,
@@ -30519,7 +30575,7 @@ var addGridInteractivity = function addGridInteractivity(two, befunge) {
   var befunge = Befunge.create(two, interpreter, grid, gridGfx, cellGfx, pointerGfx, terminal);
 
   var cellConstructor = function cellConstructor(instruction, coords) {
-    Befunge.newCell(befunge, instruction, coords);
+    Befunge.newCell(befunge, instruction, coords, false);
   };
 
   _reactDom2.default.render(_react2.default.createElement(_navbar2.default, {
@@ -30542,9 +30598,7 @@ var addGridInteractivity = function addGridInteractivity(two, befunge) {
       Interpreter.slowDown(interpreter);
     },
     befunge: befunge,
-    running: true }), document.getElementById('header'));
-
-  Befunge.start(befunge);
+    running: befunge.running }), document.getElementById('header'));
 
   two.update();
 
