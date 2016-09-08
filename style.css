@@ -46,6 +46,9 @@ canvas {
     display: block;
     margin: 0px auto;
 }
+svg text {
+    cursor: default;
+}
 
 
 
